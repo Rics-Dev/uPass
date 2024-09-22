@@ -38,7 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeFloatingActionButton() {
+fun HomeFloatingActionButton(
+    addAccount: () -> Unit,
+) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Column(
@@ -64,7 +66,7 @@ fun HomeFloatingActionButton() {
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     SmallFloatingActionButton(
-                        onClick = { /* Handle click */ },
+                        onClick = { addAccount() },
                     ) {
                         Icon(Icons.Outlined.Lock, contentDescription = "Search")
                     }
