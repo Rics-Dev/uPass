@@ -16,14 +16,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.ricsdev.uconnect.navigation.Screens
 import com.ricsdev.uconnect.presentation.home.components.HomeFloatingActionButton
-import com.ricsdev.uconnect.presentation.account.AccountModal
 import org.koin.compose.viewmodel.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    navHostController: NavHostController
+) {
 
     val viewModel = koinViewModel<HomeViewModel>()
 
@@ -41,7 +45,10 @@ fun HomeScreen() {
         },
         floatingActionButton = {
             HomeFloatingActionButton(
-                addAccount = { showAddAccountModal = true }
+                addAccount = {
+                    navHostController.navigate(Screens.NewAccountScreen.route)
+//                    showAddAccountModal = true
+                }
             )
         }
     ) { innerPadding ->
@@ -57,11 +64,11 @@ fun HomeScreen() {
 
 
 
-        if (showAddAccountModal) {
-            AccountModal(
-                onDismiss = { showAddAccountModal = false }
-            )
-        }
+//        if (showAddAccountModal) {
+//            AccountModal(
+//                onDismiss = { showAddAccountModal = false }
+//            )
+//        }
 
     }
 
