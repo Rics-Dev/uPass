@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ricsdev.uconnect.presentation.homeScreen.HomeScreen
+import com.ricsdev.uconnect.presentation.home.HomeScreen
 
 @Composable
 fun AppNavigation(

@@ -1,4 +1,4 @@
-package com.ricsdev.uconnect.presentation.homeScreen.components
+package com.ricsdev.uconnect.presentation.home.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -19,9 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -93,10 +91,24 @@ fun HomeFloatingActionButton(
         FloatingActionButton(
             onClick = { isExpanded = !isExpanded }
         ) {
-            Icon(
-                if (isExpanded) Icons.Filled.Close else Icons.Filled.Add,
-                contentDescription = if (isExpanded) "Close" else "Add"
-            )
+            AnimatedVisibility(
+                visible = isExpanded
+            ){
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = "Close"
+                )
+            }
+
+            AnimatedVisibility(
+                visible = !isExpanded
+            ){
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = "Add"
+                )
+            }
+
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.ricsdev.uconnect.presentation.homeScreen
+package com.ricsdev.uconnect.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

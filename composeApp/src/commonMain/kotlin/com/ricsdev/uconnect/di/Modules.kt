@@ -1,6 +1,6 @@
 package com.ricsdev.uconnect.di
 
-import com.ricsdev.uconnect.presentation.homeScreen.HomeViewModel
+import com.ricsdev.uconnect.presentation.home.HomeViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
