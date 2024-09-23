@@ -23,36 +23,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.ricsdev.uconnect.domain.model.CustomField
+import com.ricsdev.uconnect.domain.model.CustomFieldType
+import com.ricsdev.uconnect.domain.model.TwoFaSettings
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
 import org.koin.compose.viewmodel.koinViewModel
 
-data class Account(
-    val name: String = "",
-    val username: String = "",
-    val password: String = "",
-    val urls: List<String> = listOf(""),
-    val twoFaSettings: TwoFaSettings? = null,
-    val customFields: List<CustomField> = emptyList(),
-    val note: String = ""
-)
 
-data class TwoFaSettings(
-    val secretKey: String = "",
-    val type: String = "TOTP",
-    val hashFunction: String = "SHA1",
-    val period: String = "30",
-    val digits: String = "6"
-)
-
-enum class CustomFieldType {
-    TEXT, HIDDEN, BOOLEAN, LINKED
-}
-
-data class CustomField(
-    val type: CustomFieldType,
-    val label: String,
-    var value: String = ""
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +38,7 @@ fun NewAccountScreen(
 ) {
 
     val viewModel = koinViewModel<AccountViewModel>()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     var showPasswordGenerator by remember { mutableStateOf(false) }
 
 
@@ -105,21 +82,21 @@ fun NewAccountScreen(
                 AccountItem(
                     icon = Icons.Outlined.Public,
                     label = "Account",
-                    value = uiState.account.name,
+                    value = accountState.name,
                     onValueChange = { viewModel.updateAccountName(it) },
                     keyboardType = KeyboardType.Text
                 )
                 AccountItem(
                     icon = Icons.Outlined.AccountCircle,
                     label = "Username / Email",
-                    value = uiState.account.username,
+                    value = accountState.username,
                     onValueChange = { viewModel.updateUsername(it) },
                     keyboardType = KeyboardType.Email
                 )
                 AccountItem(
                     icon = Icons.Outlined.Password,
                     label = "Password",
-                    value = uiState.account.password,
+                    value = accountState.password,
                     onValueChange = { viewModel.updatePassword(it) },
                     isPassword = true,
                     showPasswordGenerator = {
@@ -131,13 +108,13 @@ fun NewAccountScreen(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
 
-                uiState.account.urls.forEachIndexed { index, url ->
+                accountState.urls.forEachIndexed { index, url ->
                     UrlInputField(
                         url = url,
                         onUrlChange = { newUrl -> viewModel.updateUrl(index, newUrl) },
                         onRemoveUrl = { viewModel.removeUrl(index) },
                         index = index,
-                        urlListSize = uiState.account.urls.size
+                        urlListSize = accountState.urls.size
                     )
                 }
                 Button(
@@ -157,7 +134,7 @@ fun NewAccountScreen(
                     text = "2FA Setup",
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
-                AnimatedVisibility(visible = uiState.account.twoFaSettings == null) {
+                AnimatedVisibility(visible = accountState.twoFaSettings == null) {
                     Button(
                         onClick = { viewModel.initializeTwoFaSettings() },
                         modifier = Modifier
@@ -168,9 +145,9 @@ fun NewAccountScreen(
                     }
                 }
 
-                AnimatedVisibility(visible = uiState.account.twoFaSettings != null) {
+                AnimatedVisibility(visible = accountState.twoFaSettings != null) {
                     TwoFaSettingsSection(
-                        twoFaSettings = uiState.account.twoFaSettings!!,
+                        twoFaSettings = accountState.twoFaSettings!!,
                         onTwoFaSettingsChange = { viewModel.updateTwoFaSettings(it) }
                     )
                 }
@@ -180,7 +157,7 @@ fun NewAccountScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 CustomFieldsSection(
-                    customFields = uiState.account.customFields,
+                    customFields = accountState.customFields,
                     onCustomFieldChange = { index, field ->
                         viewModel.updateCustomField(
                             index,
@@ -196,7 +173,7 @@ fun NewAccountScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 NoteSection(
-                    note = uiState.account.note,
+                    note = accountState.note,
                     onNoteChange = { viewModel.updateNote(it) }
                 )
 
