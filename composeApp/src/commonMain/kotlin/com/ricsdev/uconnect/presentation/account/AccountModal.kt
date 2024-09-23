@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,12 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.ricsdev.uconnect.presentation.home.HomeViewModel
+import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
 import org.koin.compose.viewmodel.koinViewModel
 
 data class Account(
@@ -56,164 +58,168 @@ data class CustomField(
 @Composable
 fun NewAccountScreen(
     navHostController: NavHostController
-//    onDismiss: () -> Unit,
 ) {
 
     val viewModel = koinViewModel<AccountViewModel>()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showPasswordGenerator by remember { mutableStateOf(false) }
 
 
-//    val sheetState = rememberModalBottomSheetState(
-//        skipPartiallyExpanded = true,
-//        confirmValueChange = {
-//            it != SheetValue.PartiallyExpanded
-//        }
-//    )
 
-    val uiState by viewModel.uiState.collectAsState()
-
-//    ModalBottomSheet(
-//        shape = BottomSheetDefaults.HiddenShape,
-//        dragHandle = null,
-//        onDismissRequest = {
-//            onDismiss()
-//        },
-//        sheetState = sheetState,
-//    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                    ),
-                    title = { Text("Add new account") },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            navHostController.navigateUp()
-                        }) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { viewModel.saveAccount() }
-                        ){
-                            Icon(Icons.Outlined.Save, contentDescription = "save account")
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+                title = { Text("Add new account") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navHostController.navigateUp()
+                    }) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "Back")
                     }
-                )
-            }
-        ) { innerPadding ->
+                },
+                actions = {
+                    IconButton(
+                        onClick = { viewModel.saveAccount() }
+                    ) {
+                        Icon(Icons.Outlined.Save, contentDescription = "save account")
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
+                    .padding(vertical = 16.dp)
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
+                AccountItem(
+                    icon = Icons.Outlined.Public,
+                    label = "Account",
+                    value = uiState.account.name,
+                    onValueChange = { viewModel.updateAccountName(it) },
+                    keyboardType = KeyboardType.Text
+                )
+                AccountItem(
+                    icon = Icons.Outlined.AccountCircle,
+                    label = "Username / Email",
+                    value = uiState.account.username,
+                    onValueChange = { viewModel.updateUsername(it) },
+                    keyboardType = KeyboardType.Email
+                )
+                AccountItem(
+                    icon = Icons.Outlined.Password,
+                    label = "Password",
+                    value = uiState.account.password,
+                    onValueChange = { viewModel.updatePassword(it) },
+                    isPassword = true,
+                    showPasswordGenerator = {
+                        showPasswordGenerator = true
+                    },
+                    keyboardType = KeyboardType.Password
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Column(
+                uiState.account.urls.forEachIndexed { index, url ->
+                    UrlInputField(
+                        url = url,
+                        onUrlChange = { newUrl -> viewModel.updateUrl(index, newUrl) },
+                        onRemoveUrl = { viewModel.removeUrl(index) },
+                        index = index,
+                        urlListSize = uiState.account.urls.size
+                    )
+                }
+                Button(
+                    onClick = { viewModel.addUrl() },
                     modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .weight(1f) // Give the scrollable content as much space as possible
-                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    AccountItem(
-                        icon = Icons.Outlined.Public,
-                        label = "Account",
-                        value = uiState.account.name,
-                        onValueChange = { viewModel.updateAccountName(it) }
-                    )
-                    AccountItem(
-                        icon = Icons.Outlined.AccountCircle,
-                        label = "Username / Email",
-                        value = uiState.account.username,
-                        onValueChange = { viewModel.updateUsername(it) }
-                    )
-                    AccountItem(
-                        icon = Icons.Outlined.Password,
-                        label = "Password",
-                        value = uiState.account.password,
-                        onValueChange = { viewModel.updatePassword(it) },
-                        isPassword = true
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Add another URL")
+                }
 
-                    uiState.account.urls.forEachIndexed { index, url ->
-                        UrlInputField(
-                            url = url,
-                            onUrlChange = { newUrl -> viewModel.updateUrl(index, newUrl) },
-                            onRemoveUrl = { viewModel.removeUrl(index) },
-                            index = index,
-                            urlListSize = uiState.account.urls.size
-                        )
-                    }
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "2FA Setup",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                AnimatedVisibility(visible = uiState.account.twoFaSettings == null) {
                     Button(
-                        onClick = { viewModel.addUrl() },
+                        onClick = { viewModel.initializeTwoFaSettings() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Text("Add another URL")
+                        Text("Add 2FA")
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "2FA Setup",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                    )
-                    AnimatedVisibility(visible = uiState.account.twoFaSettings == null) {
-                        Button(
-                            onClick = { viewModel.initializeTwoFaSettings() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text("Add 2FA")
-                        }
-                    }
-
-                    AnimatedVisibility(visible = uiState.account.twoFaSettings != null) {
-                        TwoFaSettingsSection(
-                            twoFaSettings = uiState.account.twoFaSettings!!,
-                            onTwoFaSettingsChange = { viewModel.updateTwoFaSettings(it) }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    CustomFieldsSection(
-                        customFields = uiState.account.customFields,
-                        onCustomFieldChange = { index, field ->
-                            viewModel.updateCustomField(
-                                index,
-                                field
-                            )
-                        },
-                        onAddCustomField = { viewModel.addCustomField() },
-                        onRemoveCustomField = { index -> viewModel.removeCustomField(index) }
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider()
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    NoteSection(
-                        note = uiState.account.note,
-                        onNoteChange = { viewModel.updateNote(it) }
-                    )
-
                 }
 
+                AnimatedVisibility(visible = uiState.account.twoFaSettings != null) {
+                    TwoFaSettingsSection(
+                        twoFaSettings = uiState.account.twoFaSettings!!,
+                        onTwoFaSettingsChange = { viewModel.updateTwoFaSettings(it) }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                CustomFieldsSection(
+                    customFields = uiState.account.customFields,
+                    onCustomFieldChange = { index, field ->
+                        viewModel.updateCustomField(
+                            index,
+                            field
+                        )
+                    },
+                    onAddCustomField = { viewModel.addCustomField() },
+                    onRemoveCustomField = { index -> viewModel.removeCustomField(index) }
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
+
+                NoteSection(
+                    note = uiState.account.note,
+                    onNoteChange = { viewModel.updateNote(it) }
+                )
 
             }
+
+
         }
-//    }
+    }
+    if (showPasswordGenerator) {
+        PasswordGenerator(
+            isAddingAccount = true,
+            usePassword = { password ->
+                viewModel.updatePassword(password)
+                showPasswordGenerator = false
+
+            },
+            onDismiss = {
+                showPasswordGenerator = false
+            },
+        )
+    }
 }
+
 
 @Composable
 fun TwoFaSettingsSection(
@@ -232,7 +238,8 @@ fun TwoFaSettingsSection(
             label = "Secret Key",
             value = twoFaSettings.secretKey,
             onValueChange = { onTwoFaSettingsChange(twoFaSettings.copy(secretKey = it)) },
-            is2fa = true
+            is2fa = true,
+            keyboardType = KeyboardType.Password
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -457,6 +464,7 @@ fun UrlInputField(
             onValueChange = onUrlChange,
             label = { Text("Url") },
             modifier = Modifier.weight(1f),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri)
         )
         if (index < urlListSize - 1) {
             ElevatedButton(
@@ -478,7 +486,9 @@ fun AccountItem(
     value: String,
     onValueChange: (String) -> Unit,
     isPassword: Boolean = false,
-    is2fa: Boolean = false
+    is2fa: Boolean = false,
+    showPasswordGenerator: () -> Unit = {},
+    keyboardType: KeyboardType,
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -504,7 +514,9 @@ fun AccountItem(
                                 contentDescription = if (isPasswordVisible) "Hide Password" else "Show Password"
                             )
                         }
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = {
+                            showPasswordGenerator()
+                        }) {
                             Icon(
                                 imageVector = if (isPassword) Icons.Outlined.LockReset else Icons.Outlined.QrCodeScanner,
                                 contentDescription = "Generate Password"
@@ -517,7 +529,8 @@ fun AccountItem(
             onValueChange = onValueChange,
             label = { Text(label) },
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if ((isPassword || is2fa) && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None
+            visualTransformation = if ((isPassword || is2fa) && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
         )
     }
 }

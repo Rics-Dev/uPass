@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.rounded.Password
 import androidx.compose.material.icons.rounded.QrCodeScanner
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeFloatingActionButton(
     addAccount: () -> Unit,
+    showPasswordGenerator: () -> Unit,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -58,6 +60,22 @@ fun HomeFloatingActionButton(
                 modifier = Modifier.padding(4.dp),
                 horizontalAlignment = Alignment.End,
             ) {
+                Spacer(modifier = Modifier.height(5.dp))
+                Row {
+                    FilledTonalButton(
+                        contentPadding = PaddingValues(8.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        onClick = { showPasswordGenerator() }
+                    ) {
+                        Text("Password Generator")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    SmallFloatingActionButton(
+                        onClick = { showPasswordGenerator() },
+                    ) {
+                        Icon(Icons.Rounded.Password, contentDescription = "Search")
+                    }
+                }
                 Row {
                     FilledTonalButton(
                         contentPadding = PaddingValues(8.dp),
