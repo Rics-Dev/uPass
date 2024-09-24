@@ -6,23 +6,17 @@ import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.domain.model.CustomField
 import com.ricsdev.uconnect.domain.model.CustomFieldType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
-import com.ricsdev.uconnect.util.CryptoManager
-import com.ricsdev.uconnect.util.SecureStorage
+import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class AccountViewModel(
-    private val secureStorage: SecureStorage
+    private val saveAccountUseCase: SaveAccountUseCase,
 ) : ViewModel() {
     private val _accountState = MutableStateFlow(Account())
     val accountState: StateFlow<Account> = _accountState
-    val cryptoManager = CryptoManager(secureStorage)
-
-
 
 
     fun updateAccountName(name: String) {
@@ -101,25 +95,9 @@ class AccountViewModel(
 
     fun saveAccount() {
         viewModelScope.launch {
-            // Initialize the AES key
-            cryptoManager.initializeAesKey()
-
-            // Convert account data to ByteArray (you may need to serialize it)
-//            val accountData = _accountState.value.toString().encodeToByteArray()
-
-            val accountData = Json.encodeToString(_accountState.value).encodeToByteArray()
-
-            // Encrypt the account data
-            val encryptedData = cryptoManager.encrypt(accountData)
-
-            // Print the encrypted data
-            println("Encrypted account data: ${encryptedData.joinToString(",")}")
-
-
-            val decryptedData = cryptoManager.decrypt(encryptedData)
-            val decryptedString = decryptedData.decodeToString()
-            val decryptedAccount = Json.decodeFromString<Account>(decryptedString)
-            println("Decrypted account data: $decryptedAccount")
+            val account = _accountState.value
+            println("saved account: $account")
+            saveAccountUseCase.execute(account)
         }
     }
 }

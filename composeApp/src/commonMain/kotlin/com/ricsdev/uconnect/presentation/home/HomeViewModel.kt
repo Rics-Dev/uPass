@@ -2,30 +2,31 @@ package com.ricsdev.uconnect.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ricsdev.uconnect.domain.model.Account
+import com.ricsdev.uconnect.domain.usecase.GetAllAccountsUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
 class HomeViewModel(
+    private val getAllAccountsUseCase: GetAllAccountsUseCase
+) : ViewModel() {
 
-): ViewModel() {
-
-
-
-    private val _timer = MutableStateFlow(0)
-    val timer = _timer.asStateFlow()
-
+    private val _accountsState = MutableStateFlow<List<Account>>(emptyList())
+    val accountsState: StateFlow<List<Account>> = _accountsState
 
     init {
+        fetchAccounts()
+    }
+
+    private fun fetchAccounts() {
         viewModelScope.launch {
-            while (true) {
-                delay(1000)
-                _timer.value++
+            getAllAccountsUseCase().collect { accounts ->
+                _accountsState.value = accounts
             }
         }
     }
-
-
 }

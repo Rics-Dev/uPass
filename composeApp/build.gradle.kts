@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     kotlin("plugin.serialization")
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -28,6 +30,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // Required when using NativeSQLiteDriver
+            linkerOpts.add("-lsqlite3")
         }
     }
 
@@ -70,6 +74,11 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
 
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+
+
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
 
         }
         desktopMain.dependencies {
@@ -122,6 +131,7 @@ android {
     }
 }
 
+
 compose.desktop {
     application {
         mainClass = "com.ricsdev.uconnect.MainKt"
@@ -132,4 +142,13 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+dependencies {
+    ksp(libs.room.compiler)
 }

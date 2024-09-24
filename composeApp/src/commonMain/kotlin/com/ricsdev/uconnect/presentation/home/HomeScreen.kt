@@ -2,10 +2,28 @@ package com.ricsdev.uconnect.presentation.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.navigation.Screens
 import com.ricsdev.uconnect.presentation.home.components.HomeFloatingActionButton
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
@@ -17,15 +35,24 @@ fun HomeScreen(
     navHostController: NavHostController
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
+    val accounts by viewModel.accountsState.collectAsState()
     var showPasswordGenerator by remember { mutableStateOf(false) }
-
 
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(),
                 title = { Text(text = "uConnect") },
-                navigationIcon = { /* TODO */ }
+//                navigationIcon = {
+//                    IconButton(onClick = { /* TODO: Open drawer or menu */ }) {
+//                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+//                    }
+//                },
+//                actions = {
+//                    IconButton(onClick = { showPasswordGenerator = true }) {
+//                        Icon(Icons.Default.Key, contentDescription = "Generate Password")
+//                    }
+//                }
             )
         },
         floatingActionButton = {
@@ -39,24 +66,85 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            // Your content here
+        if (accounts.isEmpty()) {
+            EmptyStateMessage(modifier = Modifier.padding(innerPadding))
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                items(accounts) { account ->
+                    AccountCard(account = account)
+                }
+            }
         }
     }
 
     if (showPasswordGenerator) {
         PasswordGenerator(
-            onDismiss = {
-                showPasswordGenerator = false
-            },
+            onDismiss = { showPasswordGenerator = false },
         )
     }
 }
 
+@Composable
+fun EmptyStateMessage(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "No accounts added yet. Tap the + button to add one!",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+    }
+}
+
+@Composable
+fun AccountCard(account: Account) {
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.fillMaxWidth()
+            .shadow(4.dp, RoundedCornerShape(8.dp), clip = true),
+        onClick = { /* TODO: Navigate to account details */ }
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+
+            ) {
+                Text(
+                    text = account.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = account.username,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+            Row() {
+                IconButton(onClick = { clipboardManager.setText(AnnotatedString(account.username))}) {
+                    Icon(Icons.Outlined.AccountCircle, contentDescription = "Copy username")
+                }
+                IconButton(onClick = { clipboardManager.setText(AnnotatedString(account.password)) }) {
+                    Icon(Icons.Outlined.Password, contentDescription = "Copy password")
+                }
+            }
+        }
+    }
+}
 
 

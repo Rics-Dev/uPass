@@ -59,7 +59,10 @@ fun NewAccountScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { viewModel.saveAccount() }
+                        onClick = {
+                            viewModel.saveAccount()
+                            navHostController.navigateUp()
+                        }
                     ) {
                         Icon(Icons.Outlined.Save, contentDescription = "save account")
                     }
