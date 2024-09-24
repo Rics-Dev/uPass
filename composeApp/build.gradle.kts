@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -16,9 +17,9 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     jvm("desktop")
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -29,9 +30,10 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
         val desktopMain by getting
+
 
         androidMain.dependencies {
             implementation(compose.preview)
@@ -39,6 +41,11 @@ kotlin {
 
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+
+            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.3.1")
+
+            implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -58,12 +65,22 @@ kotlin {
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
 
+            implementation("dev.whyoleg.cryptography:cryptography-core:0.3.1")
 
+            implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
+
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
+
+            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.3.1")
+        }
+        iosMain.dependencies {
+
+            implementation("dev.whyoleg.cryptography:cryptography-provider-apple:0.3.1")
         }
     }
 }

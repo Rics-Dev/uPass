@@ -1,17 +1,29 @@
 package com.ricsdev.uconnect.presentation.account
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.domain.model.CustomField
 import com.ricsdev.uconnect.domain.model.CustomFieldType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
+import com.ricsdev.uconnect.util.CryptoManager
+import com.ricsdev.uconnect.util.SecureStorage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-class AccountViewModel : ViewModel() {
+class AccountViewModel(
+    private val secureStorage: SecureStorage
+) : ViewModel() {
     private val _accountState = MutableStateFlow(Account())
     val accountState: StateFlow<Account> = _accountState
+    val cryptoManager = CryptoManager(secureStorage)
+
+
+
 
     fun updateAccountName(name: String) {
         _accountState.update { it.copy(name = name) }
@@ -88,8 +100,26 @@ class AccountViewModel : ViewModel() {
     }
 
     fun saveAccount() {
-        // Implement the logic to save the account to your data source
-        // For example, you might call a repository method here
-        println("Saving account: ${_accountState.value}")
+        viewModelScope.launch {
+            // Initialize the AES key
+            cryptoManager.initializeAesKey()
+
+            // Convert account data to ByteArray (you may need to serialize it)
+//            val accountData = _accountState.value.toString().encodeToByteArray()
+
+            val accountData = Json.encodeToString(_accountState.value).encodeToByteArray()
+
+            // Encrypt the account data
+            val encryptedData = cryptoManager.encrypt(accountData)
+
+            // Print the encrypted data
+            println("Encrypted account data: ${encryptedData.joinToString(",")}")
+
+
+            val decryptedData = cryptoManager.decrypt(encryptedData)
+            val decryptedString = decryptedData.decodeToString()
+            val decryptedAccount = Json.decodeFromString<Account>(decryptedString)
+            println("Decrypted account data: $decryptedAccount")
+        }
     }
 }

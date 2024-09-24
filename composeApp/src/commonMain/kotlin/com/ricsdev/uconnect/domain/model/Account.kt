@@ -1,5 +1,9 @@
 package com.ricsdev.uconnect.domain.model
 
+import kotlinx.serialization.Serializable
+
+
+@Serializable
 data class Account(
     val name: String = "",
     val username: String = "",
@@ -10,6 +14,7 @@ data class Account(
     val note: String = ""
 )
 
+@Serializable
 data class TwoFaSettings(
     val secretKey: String = "",
     val type: String = "TOTP",
@@ -22,6 +27,8 @@ enum class CustomFieldType {
     TEXT, HIDDEN, BOOLEAN, LINKED
 }
 
+
+@Serializable
 data class CustomField(
     val type: CustomFieldType,
     val label: String,
