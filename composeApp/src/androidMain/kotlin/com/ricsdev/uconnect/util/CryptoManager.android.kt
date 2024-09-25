@@ -56,6 +56,7 @@ actual class SecureStorage(private val context: Context) {
         emit(sharedPreferences.contains("master_password"))
     }
 
+
     private fun ByteArray.encodeBase64(): String = android.util.Base64.encodeToString(this, android.util.Base64.DEFAULT)
     private fun String.decodeBase64(): ByteArray = android.util.Base64.decode(this, android.util.Base64.DEFAULT)
 }

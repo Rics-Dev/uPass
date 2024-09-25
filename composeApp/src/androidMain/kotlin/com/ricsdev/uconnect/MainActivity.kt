@@ -3,20 +3,14 @@ package com.ricsdev.uconnect
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.ricsdev.uconnect.di.initKoin
-import org.koin.android.ext.koin.androidContext
+import androidx.fragment.app.FragmentActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initKoin {
-            androidContext(this@MainActivity)
-        }
-
 
         setContent {
             App()
-
         }
     }
 }

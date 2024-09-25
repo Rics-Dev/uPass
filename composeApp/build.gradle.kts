@@ -54,6 +54,9 @@ kotlin {
 
             implementation(libs.cryptography.provider.jdk)
             implementation(libs.androidx.security.crypto)
+            implementation(libs.androidx.biometric)
+            implementation("dev.icerock.moko:biometry-compose:0.4.0")
+
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -84,6 +87,8 @@ kotlin {
             implementation(libs.adaptive.navigation)
             implementation(libs.material3.adaptive.navigation.suite)
             implementation(libs.material3.window.size.classe)
+
+
 
 
         }
