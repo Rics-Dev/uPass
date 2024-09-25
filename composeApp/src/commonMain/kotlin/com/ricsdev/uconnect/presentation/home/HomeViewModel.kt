@@ -13,8 +13,9 @@ class HomeViewModel(
     private val getAllAccountsUseCase: GetAllAccountsUseCase
 ) : ViewModel() {
 
-    private val _accountsState = MutableStateFlow<List<Account>>(emptyList())
-    val accountsState: StateFlow<List<Account>> = _accountsState
+
+    private val _accountsState = MutableStateFlow<UiState<List<Account>>>(UiState.Loading)
+    val accountsState: StateFlow<UiState<List<Account>>> = _accountsState
 
     init {
         fetchAccounts()
@@ -22,8 +23,12 @@ class HomeViewModel(
 
     private fun fetchAccounts() {
         viewModelScope.launch {
-            getAllAccountsUseCase().collect { accounts ->
-                _accountsState.value = accounts
+            try {
+                getAllAccountsUseCase().collect { accounts ->
+                    _accountsState.value = UiState.Success(accounts)
+                }
+            } catch (e: Exception) {
+                _accountsState.value = UiState.Error(e.message ?: "Unknown error")
             }
         }
     }

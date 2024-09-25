@@ -6,11 +6,19 @@ import dev.whyoleg.cryptography.algorithms.symmetric.AES
 import dev.whyoleg.cryptography.algorithms.asymmetric.ECDSA
 import dev.whyoleg.cryptography.algorithms.asymmetric.EC
 import dev.whyoleg.cryptography.algorithms.symmetric.SymmetricKeySize
+import kotlinx.coroutines.flow.Flow
 
+
+//expect class SecureStorage {
+//    suspend fun saveKey(key: ByteArray)
+//    suspend fun retrieveKey(): ByteArray?
+//}
 
 expect class SecureStorage {
     suspend fun saveKey(key: ByteArray)
     suspend fun retrieveKey(): ByteArray?
+    suspend fun setMasterPassword(password: String)
+    fun isMasterPasswordSet(): Flow<Boolean>
 }
 
 

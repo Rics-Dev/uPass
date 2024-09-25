@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Password
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +32,7 @@ fun HomeScreen(
     navHostController: NavHostController
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
-    val accounts by viewModel.accountsState.collectAsState()
+    val accountsState by viewModel.accountsState.collectAsState()
     var showPasswordGenerator by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
@@ -62,22 +63,50 @@ fun HomeScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        if (accounts.isEmpty()) {
-            EmptyStateMessage(modifier = Modifier.padding(innerPadding))
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(MaterialTheme.colorScheme.background),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                items(accounts) { account ->
-                    AccountCard(
-                        account = account,
-                        onShowSnackbar = { message -> snackbarMessage = message },
-                        navHostController = navHostController
+        when (accountsState) {
+            is UiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is UiState.Success -> {
+                val accounts = (accountsState as UiState.Success<List<Account>>).data
+                if (accounts.isEmpty()) {
+                    EmptyStateMessage(modifier = Modifier.padding(innerPadding))
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .background(MaterialTheme.colorScheme.background),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        items(accounts) { account ->
+                            AccountCard(
+                                account = account,
+                                onShowSnackbar = { message -> snackbarMessage = message },
+                                navHostController = navHostController
+                            )
+                        }
+                    }
+                }
+            }
+            is UiState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = (accountsState as UiState.Error).message,
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }
@@ -94,14 +123,30 @@ fun HomeScreen(
 @Composable
 fun EmptyStateMessage(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize()
+            .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "No accounts added yet. Tap the + button to add one!",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(Icons.Outlined.Shield, contentDescription = "No accounts",
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No accounts added yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Text(
+                text = "Tap the + button to add one!",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
     }
 }
 
