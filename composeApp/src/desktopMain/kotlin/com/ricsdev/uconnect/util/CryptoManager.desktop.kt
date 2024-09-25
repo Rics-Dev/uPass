@@ -14,6 +14,7 @@ import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 
 //actual class SecureStorage {
 //    private val preferences = Preferences.userNodeForPackage(SecureStorage::class.java)
@@ -79,6 +80,16 @@ actual class SecureStorage {
         preferences.flush()
     }
 
+    actual suspend fun verifyMasterPassword(password: String): Boolean = withContext(Dispatchers.IO) {
+        val storedHash = preferences.get("master_password", null)
+        if (storedHash != null) {
+            val inputHash = hashPassword(password)
+            inputHash == storedHash
+        } else {
+            false
+        }
+    }
+
     actual fun isMasterPasswordSet(): Flow<Boolean> = flow {
         emit(preferences.get("master_password", null) != null)
     }
@@ -106,7 +117,8 @@ actual class SecureStorage {
     private fun deriveKey(password: CharArray): SecretKey {
         val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
         val spec: KeySpec = PBEKeySpec(password, salt, 65536, 256)
-        return factory.generateSecret(spec)
+        val secretKey = factory.generateSecret(spec)
+        return SecretKeySpec(secretKey.encoded, "AES")
     }
 
     private fun encrypt(data: ByteArray, password: CharArray): Pair<ByteArray, ByteArray> {
@@ -125,4 +137,16 @@ actual class SecureStorage {
         cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
         return cipher.doFinal(encryptedData)
     }
+
+
+
+
+//    actual suspend fun reset() = withContext(Dispatchers.IO) {
+//        try {
+//            preferences.clear()
+//            preferences.flush()
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//        }
+//    }
 }

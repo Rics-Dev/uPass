@@ -47,6 +47,10 @@ actual class SecureStorage(private val context: Context) {
         }
     }
 
+    actual suspend fun verifyMasterPassword(password: String): Boolean = withContext(Dispatchers.IO) {
+        sharedPreferences.contains("master_password")
+    }
+
 
     actual fun isMasterPasswordSet(): Flow<Boolean> = flow {
         emit(sharedPreferences.contains("master_password"))

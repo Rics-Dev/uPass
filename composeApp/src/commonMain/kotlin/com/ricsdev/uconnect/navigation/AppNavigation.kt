@@ -17,6 +17,7 @@ import androidx.navigation.toRoute
 import com.ricsdev.uconnect.presentation.account.AccountDetailsScreen
 import com.ricsdev.uconnect.presentation.account.NewAccountScreen
 import com.ricsdev.uconnect.presentation.home.HomeScreen
+import com.ricsdev.uconnect.presentation.setupScreen.SetupScreen
 import com.ricsdev.uconnect.util.SecureStorage
 import kotlinx.coroutines.flow.first
 import org.koin.compose.getKoin
@@ -26,44 +27,39 @@ import org.koin.compose.koinInject
 fun AppNavigation(
 ) {
     val navController = rememberNavController()
-    var startDestination by remember { mutableStateOf<Any?>(null) }
-    val secureStorage: SecureStorage = koinInject<SecureStorage>()
 
-    LaunchedEffect(Unit) {
-        startDestination = if (secureStorage.isMasterPasswordSet().first()) {
-            Screens.HomeScreen
-        } else {
-            Screens.SetupScreen
+
+
+    NavHost(
+        navController = navController,
+        startDestination = Screens.SetupScreen
+    ) {
+
+        composable<Screens.SetupScreen> {
+            SetupScreen(navController)
         }
-    }
 
 
-    if (startDestination != null) {
-        NavHost(
-            navController = navController,
-            startDestination = startDestination!!
+        composable<Screens.HomeScreen> {
+            HomeScreen(navController)
+        }
+
+
+        composable<Screens.NewAccountScreen>(
+            enterTransition = {
+                slideInVertically(initialOffsetY = { it }) + fadeIn()
+            },
+            exitTransition = {
+                slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            }
         ) {
-            composable<Screens.HomeScreen> {
-                HomeScreen(navController)
-            }
+            NewAccountScreen(navController)
+        }
 
 
-            composable<Screens.NewAccountScreen>(
-                enterTransition = {
-                    slideInVertically(initialOffsetY = { it }) + fadeIn()
-                },
-                exitTransition = {
-                    slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                }
-            ) {
-                NewAccountScreen(navController)
-            }
-
-
-            composable<Screens.AccountDetailsScreen> {
-                val args = it.toRoute<Screens.AccountDetailsScreen>()
-                AccountDetailsScreen(navController, args.id)
-            }
+        composable<Screens.AccountDetailsScreen> {
+            val args = it.toRoute<Screens.AccountDetailsScreen>()
+            AccountDetailsScreen(navController, args.id)
         }
 
     }

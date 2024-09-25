@@ -8,13 +8,13 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 fun main() = application {
-    val appDataManager = AppDataManager("uConnect")
+//    val appDataManager = AppDataManager("uConnect")
 
     initKoin()
 
-    kotlinx.coroutines.runBlocking {
-        appDataManager.clearAppData()
-    }
+//    kotlinx.coroutines.runBlocking {
+//        appDataManager.clearAppData()
+//    }
 
 
 
@@ -28,26 +28,24 @@ fun main() = application {
 
 
 
-class AppDataManager(private val appName: String) {
-    private val appDataDir: File by lazy {
-        when {
-            System.getProperty("os.name").lowercase().contains("win") -> {
-                File(System.getenv("LOCALAPPDATA"), appName)
-            }
-            System.getProperty("os.name").lowercase().contains("mac") -> {
-                File(System.getProperty("user.home"), "Library/Application Support/$appName")
-            }
-            else -> {
-                File(System.getProperty("user.home"), ".${appName.lowercase()}")
-            }
-        }
-    }
-
-    suspend fun clearAppData() = withContext(Dispatchers.IO) {
-        if (appDataDir.exists()) {
-            appDataDir.deleteRecursively()
-        }
-    }
-
-    fun getAppDataDir(): File = appDataDir
-}
+//class AppDataManager(private val appName: String) {
+//    private val appDataDir: File by lazy {
+//        when {
+//            System.getProperty("os.name").lowercase().contains("win") -> {
+//                File(System.getenv("LOCALAPPDATA"), appName)
+//            }
+//            System.getProperty("os.name").lowercase().contains("mac") -> {
+//                File(System.getProperty("user.home"), "Library/Application Support/$appName")
+//            }
+//            else -> {
+//                File(System.getProperty("user.home"), ".${appName.lowercase()}")
+//            }
+//        }
+//    }
+//
+//    suspend fun clearAppData() = withContext(Dispatchers.IO) {
+//        if (appDataDir.exists()) {
+//            appDataDir.deleteRecursively()
+//        }
+//    }
+//}

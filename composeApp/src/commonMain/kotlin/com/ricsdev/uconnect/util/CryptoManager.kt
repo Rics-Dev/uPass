@@ -18,7 +18,9 @@ expect class SecureStorage {
     suspend fun saveKey(key: ByteArray)
     suspend fun retrieveKey(): ByteArray?
     suspend fun setMasterPassword(password: String)
+    suspend fun verifyMasterPassword(password: String): Boolean
     fun isMasterPasswordSet(): Flow<Boolean>
+//    suspend fun reset()
 }
 
 
