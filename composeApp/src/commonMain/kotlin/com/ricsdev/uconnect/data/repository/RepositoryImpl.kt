@@ -57,7 +57,8 @@ class RepositoryImpl(
                     if (decryptedData.isEmpty()) {
                         null
                     } else {
-                        Json.decodeFromString<Account>(decryptedData.decodeToString())
+                        val account = Json.decodeFromString<Account>(decryptedData.decodeToString())
+                        account.copy(id = entity.id)
                     }
                 } catch (e: Exception) {
                     println("Error decoding account entity: ${e.message}")

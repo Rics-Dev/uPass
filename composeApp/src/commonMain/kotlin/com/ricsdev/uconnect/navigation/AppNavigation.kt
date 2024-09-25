@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.ricsdev.uconnect.presentation.account.AccountDetailsScreen
 import com.ricsdev.uconnect.presentation.account.NewAccountScreen
 import com.ricsdev.uconnect.presentation.home.HomeScreen
 
@@ -19,24 +21,30 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screens.HomeScreen.route,
+        startDestination = Screens.HomeScreen,
     ) {
-        composable(
-            route = Screens.HomeScreen.route
-        ) {
+        composable<Screens.HomeScreen> {
             HomeScreen(navController)
         }
 
-        composable(
-            route = Screens.NewAccountScreen.route,
+
+        composable<Screens.NewAccountScreen>(
             enterTransition = {
                 slideInVertically(initialOffsetY = { it }) + fadeIn()
             },
             exitTransition = {
                 slideOutVertically(targetOffsetY = { it }) + fadeOut()
             }
-        ){
+        ) {
             NewAccountScreen(navController)
         }
+
+
+        composable<Screens.AccountDetailsScreen> {
+            val args = it.toRoute<Screens.AccountDetailsScreen>()
+            AccountDetailsScreen(navController, args.id)
+        }
+
+
     }
 }

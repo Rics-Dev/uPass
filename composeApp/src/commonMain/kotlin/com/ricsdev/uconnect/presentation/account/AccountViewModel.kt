@@ -6,6 +6,7 @@ import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.domain.model.CustomField
 import com.ricsdev.uconnect.domain.model.CustomFieldType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
+import com.ricsdev.uconnect.domain.usecase.GetAccountUseCase
 import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,9 +15,18 @@ import kotlinx.coroutines.launch
 
 class AccountViewModel(
     private val saveAccountUseCase: SaveAccountUseCase,
+    private val getAccountUseCase: GetAccountUseCase,
 ) : ViewModel() {
     private val _accountState = MutableStateFlow(Account())
     val accountState: StateFlow<Account> = _accountState
+
+
+    fun fetchAccountDetails(accountId: Int) {
+        viewModelScope.launch {
+            val account = getAccountUseCase(accountId)
+            _accountState.value = account ?: Account()
+        }
+    }
 
 
     fun updateAccountName(name: String) {
@@ -96,7 +106,6 @@ class AccountViewModel(
     fun saveAccount() {
         viewModelScope.launch {
             val account = _accountState.value
-            println("saved account: $account")
             saveAccountUseCase.execute(account)
         }
     }

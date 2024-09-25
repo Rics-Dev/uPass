@@ -469,6 +469,7 @@ fun AccountItem(
     is2fa: Boolean = false,
     showPasswordGenerator: () -> Unit = {},
     keyboardType: KeyboardType,
+    readOnly: Boolean = false,
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -510,7 +511,8 @@ fun AccountItem(
             label = { Text(label) },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = if ((isPassword || is2fa) && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType)
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            readOnly = readOnly,
         )
     }
 }

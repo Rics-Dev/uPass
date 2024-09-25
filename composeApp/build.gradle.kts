@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
 }
@@ -17,10 +17,16 @@ kotlin {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
+            freeCompilerArgs.add("-Xexpect-actual-classes")
         }
     }
 
-    jvm("desktop")
+    jvm("desktop") {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            freeCompilerArgs.add("-Xexpect-actual-classes")
+        }
+    }
 
     listOf(
         iosX64(),
@@ -38,18 +44,16 @@ kotlin {
     sourceSets {
         val desktopMain by getting
 
-
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+            implementation(libs.androidx.startup.runtime)
 
-            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.3.1")
-
-            implementation("androidx.security:security-crypto:1.1.0-alpha06")
-
+            implementation(libs.cryptography.provider.jdk)
+            implementation(libs.androidx.security.crypto)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -59,9 +63,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-
+            implementation(libs.androidx.material3)
+            implementation(libs.androidx.materialIconsExtended)
 
             api(libs.koin.core)
             implementation(libs.koin.compose)
@@ -69,27 +72,29 @@ kotlin {
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.navigation.compose)
 
-            implementation("dev.whyoleg.cryptography:cryptography-core:0.3.1")
-
-            implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
-
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-
-
+            implementation(libs.cryptography.core)
+            implementation(libs.kotlinx.serialization.json)
 
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
+
+
+            implementation(libs.adaptive)
+            implementation(libs.adaptive.layout)
+            implementation(libs.adaptive.navigation)
+            implementation(libs.material3.adaptive.navigation.suite)
+            implementation(libs.material3.window.size.classe)
+
 
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
 
-            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.3.1")
+            implementation(libs.cryptography.provider.jdk)
         }
         iosMain.dependencies {
-
-            implementation("dev.whyoleg.cryptography:cryptography-provider-apple:0.3.1")
+            implementation(libs.cryptography.provider.apple)
         }
     }
 }
@@ -131,7 +136,6 @@ android {
     }
 }
 
-
 compose.desktop {
     application {
         mainClass = "com.ricsdev.uconnect.MainKt"
@@ -144,11 +148,16 @@ compose.desktop {
     }
 }
 
-
 room {
     schemaDirectory("$projectDir/schemas")
 }
 
+
 dependencies {
-    ksp(libs.room.compiler)
+    add("kspCommonMainMetadata", libs.room.compiler)
+    add("kspAndroid", libs.room.compiler)
+    add("kspDesktop", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
+//    add("kspIosSimulatorArm64", libs.room.compiler)
 }

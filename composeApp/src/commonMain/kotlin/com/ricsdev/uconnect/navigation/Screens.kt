@@ -1,10 +1,19 @@
 package com.ricsdev.uconnect.navigation
 
+import kotlinx.serialization.Serializable
 
-sealed class Screens(val route: String) {
 
-    data object HomeScreen: Screens("home_screen")
-    data object NewAccountScreen: Screens("new_account_screen")
+sealed class Screens {
 
+    @Serializable
+    object HomeScreen
+
+    @Serializable
+    object NewAccountScreen
+
+    @Serializable
+    data class AccountDetailsScreen(
+        val id: Int
+    )
 
 }
