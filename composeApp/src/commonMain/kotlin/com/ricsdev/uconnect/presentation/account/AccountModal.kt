@@ -28,6 +28,10 @@ import com.ricsdev.uconnect.domain.model.CustomField
 import com.ricsdev.uconnect.domain.model.CustomFieldType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
 import com.ricsdev.uconnect.getPlatform
+import com.ricsdev.uconnect.presentation.home.components.modal.HmacAlgorithmDropdown
+import com.ricsdev.uconnect.presentation.home.components.modal.OtpDigitsDropdown
+import com.ricsdev.uconnect.presentation.home.components.modal.OtpTypeDropdown
+import com.ricsdev.uconnect.presentation.home.components.modal.TotpPeriodDropdown
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -232,8 +236,8 @@ fun TwoFaSettingsSection(
         AccountItem(
             icon = Icons.Outlined.Key,
             label = "Secret Key",
-            value = twoFaSettings.secretKey,
-            onValueChange = { onTwoFaSettingsChange(twoFaSettings.copy(secretKey = it)) },
+            value = twoFaSettings.secret,
+            onValueChange = { onTwoFaSettingsChange(twoFaSettings.copy(secret = it)) },
             is2fa = true,
             keyboardType = KeyboardType.Password
         )
@@ -261,15 +265,15 @@ fun TwoFaSettingsSection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TwoFaTypeDropdown(
+                    OtpTypeDropdown(
                         modifier = Modifier.weight(1f),
                         selectedType = twoFaSettings.type,
                         onTypeSelected = { onTwoFaSettingsChange(twoFaSettings.copy(type = it)) }
                     )
-                    HashFunctionDropdown(
+                    HmacAlgorithmDropdown(
                         modifier = Modifier.weight(1f),
-                        selectedFunction = twoFaSettings.hashFunction,
-                        onFunctionSelected = { onTwoFaSettingsChange(twoFaSettings.copy(hashFunction = it)) }
+                        selectedAlgorithm = twoFaSettings.hmacAlgorithm,
+                        onAlgorithmSelected = { onTwoFaSettingsChange(twoFaSettings.copy(hmacAlgorithm = it)) }
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -277,17 +281,15 @@ fun TwoFaSettingsSection(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
+                    TotpPeriodDropdown(
                         modifier = Modifier.weight(1f),
-                        value = twoFaSettings.period,
-                        onValueChange = { onTwoFaSettingsChange(twoFaSettings.copy(period = it)) },
-                        label = { Text("Period (seconds)") }
+                        selectedPeriod = twoFaSettings.period,
+                        onPeriodSelected = { onTwoFaSettingsChange(twoFaSettings.copy(period = it)) }
                     )
-                    OutlinedTextField(
+                    OtpDigitsDropdown(
                         modifier = Modifier.weight(1f),
-                        value = twoFaSettings.digits,
-                        onValueChange = { onTwoFaSettingsChange(twoFaSettings.copy(digits = it)) },
-                        label = { Text("Digits") }
+                        selectedDigits = twoFaSettings.digits,
+                        onDigitsSelected = { onTwoFaSettingsChange(twoFaSettings.copy(digits = it)) }
                     )
                 }
             }

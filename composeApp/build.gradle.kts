@@ -98,6 +98,18 @@ kotlin {
             implementation(libs.adaptive.navigation)
             implementation(libs.material3.adaptive.navigation.suite)
             implementation(libs.material3.window.size.classe)
+
+
+            implementation("io.matthewnelson.encoding:base16:2.2.2")
+            implementation("io.matthewnelson.encoding:base32:2.2.2")
+            implementation("io.matthewnelson.encoding:base64:2.2.2")
+
+
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+            implementation("com.ditchoom:buffer:1.4.2")
+            implementation(libs.kotlincrypto.hash.sha2)
+            implementation(libs.kotlincrypto.macs.hmac.sha1)
+            implementation(libs.kotlincrypto.macs.hmac.sha2)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

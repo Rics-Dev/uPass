@@ -94,6 +94,7 @@ fun HomeScreen(
                     ) {
                         items(accounts) { account ->
                             AccountCard(
+                                viewModel = viewModel,
                                 account = account,
                                 onShowSnackbar = { message -> snackbarMessage = message },
                                 navHostController = navHostController
@@ -164,12 +165,15 @@ fun EmptyStateMessage(modifier: Modifier = Modifier) {
 
 @Composable
 fun AccountCard(
+    viewModel: HomeViewModel,
     account: Account,
     onShowSnackbar: (String) -> Unit,
     navHostController: NavHostController
 ) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val platform = getPlatform()
+    val currentOtp by viewModel.getCurrentOtp(account.id).collectAsState(initial = null)
+    val remainingTime by viewModel.getRemainingTime(account.id).collectAsState(initial = 30)
 
     Card(
         shape = RoundedCornerShape(8.dp),
@@ -180,41 +184,65 @@ fun AccountCard(
             navHostController.navigate(Screens.AccountDetailsScreen(account.id))
         }
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
         ) {
-            Column {
-                Text(
-                    text = account.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = account.username,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-            Row {
-                IconButton(onClick = {
-                    clipboardManager.setText(AnnotatedString(account.username))
-                    if (!platform.name.contains("Android")) {
-                        onShowSnackbar("Username copied to clipboard")
-                    }
-                }) {
-                    Icon(Icons.Outlined.AccountCircle, contentDescription = "Copy username")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = account.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = account.username,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
-                IconButton(onClick = {
-                    clipboardManager.setText(AnnotatedString(account.password))
-                    if (!platform.name.contains("Android")) {
-                        onShowSnackbar("Password copied to clipboard")
+                Row {
+                    IconButton(onClick = {
+                        clipboardManager.setText(AnnotatedString(account.username))
+                        if (!platform.name.contains("Android")) {
+                            onShowSnackbar("Username copied to clipboard")
+                        }
+                    }) {
+                        Icon(Icons.Outlined.AccountCircle, contentDescription = "Copy username")
                     }
-                }) {
-                    Icon(Icons.Outlined.Password, contentDescription = "Copy password")
+                    IconButton(onClick = {
+                        clipboardManager.setText(AnnotatedString(account.password))
+                        if (!platform.name.contains("Android")) {
+                            onShowSnackbar("Password copied to clipboard")
+                        }
+                    }) {
+                        Icon(Icons.Outlined.Password, contentDescription = "Copy password")
+                    }
+                }
+            }
+
+            if (account.twoFaSettings != null && currentOtp != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "2FA Code: $currentOtp",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = "$remainingTime s",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
                 }
             }
         }

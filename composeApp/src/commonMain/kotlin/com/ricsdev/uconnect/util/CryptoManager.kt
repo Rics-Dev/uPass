@@ -1,12 +1,15 @@
 package com.ricsdev.uconnect.util
 
 import dev.whyoleg.cryptography.CryptographyProvider
+import dev.whyoleg.cryptography.DelicateCryptographyApi
 import dev.whyoleg.cryptography.algorithms.digest.SHA512
 import dev.whyoleg.cryptography.algorithms.symmetric.AES
 import dev.whyoleg.cryptography.algorithms.asymmetric.ECDSA
 import dev.whyoleg.cryptography.algorithms.asymmetric.EC
+import dev.whyoleg.cryptography.algorithms.digest.SHA1
+import dev.whyoleg.cryptography.algorithms.digest.SHA256
 import dev.whyoleg.cryptography.algorithms.symmetric.SymmetricKeySize
-
+import dev.whyoleg.cryptography.operations.hash.Hasher
 
 
 expect class SecureStorage {
@@ -104,5 +107,21 @@ class CryptoManager(private val secureStorage: SecureStorage) {
             // Handle exception
             false
         }
+    }
+
+
+
+
+    @OptIn(DelicateCryptographyApi::class)
+    suspend fun hmacSha1(): Hasher {
+        return provider.get(SHA1).hasher()
+    }
+
+    suspend fun hmacSha256(): Hasher {
+        return provider.get(SHA256).hasher()
+    }
+
+    suspend fun hmacSha512(): Hasher {
+        return provider.get(SHA512).hasher()
     }
 }

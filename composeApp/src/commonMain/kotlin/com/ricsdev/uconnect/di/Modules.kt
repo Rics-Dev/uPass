@@ -11,6 +11,7 @@ import com.ricsdev.uconnect.presentation.home.HomeViewModel
 import com.ricsdev.uconnect.presentation.home.components.modal.TwoFaSetupViewModel
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGeneratorViewModel
 import com.ricsdev.uconnect.util.CryptoManager
+import com.ricsdev.uconnect.util.twoFa.OtpManager
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -35,6 +36,8 @@ val sharedModule = module {
 
     // Utilities
     singleOf(::CryptoManager)
+    singleOf(::OtpManager)
+
 
 
 
