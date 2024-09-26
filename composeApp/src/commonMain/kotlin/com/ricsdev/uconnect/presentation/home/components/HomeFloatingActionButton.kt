@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 fun HomeFloatingActionButton(
     addAccount: () -> Unit,
     showPasswordGenerator: () -> Unit,
+    show2faSetup: () -> Unit,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -80,7 +81,7 @@ fun HomeFloatingActionButton(
                     FilledTonalButton(
                         contentPadding = PaddingValues(8.dp),
                         shape = RoundedCornerShape(12.dp),
-                        onClick = { /*TODO*/ }
+                        onClick = { addAccount() }
                     ) {
                         Text("Account")
                     }
@@ -88,7 +89,7 @@ fun HomeFloatingActionButton(
                     SmallFloatingActionButton(
                         onClick = { addAccount() },
                     ) {
-                        Icon(Icons.Outlined.Lock, contentDescription = "Search")
+                        Icon(Icons.Outlined.Lock, contentDescription = "add account")
                     }
                 }
                 Spacer(modifier = Modifier.height(5.dp))
@@ -96,13 +97,13 @@ fun HomeFloatingActionButton(
                     FilledTonalButton(
                         contentPadding = PaddingValues(8.dp),
                         shape = RoundedCornerShape(12.dp),
-                        onClick = { /*TODO*/ }
+                        onClick = { show2faSetup() }
                     ) {
                         Text("2FA")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     SmallFloatingActionButton(
-                        onClick = { /* Handle click */ },
+                        onClick = { show2faSetup() },
                     ) {
                        Icon(Icons.Rounded.QrCodeScanner, contentDescription = "Search")
                     }

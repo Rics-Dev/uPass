@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import java.io.File
 import java.util.Locale
 
-
 actual class DBFactory {
     actual fun createDatabase(): AppDatabase {
         val dbFile = when {
@@ -25,36 +24,3 @@ actual class DBFactory {
             .build()
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

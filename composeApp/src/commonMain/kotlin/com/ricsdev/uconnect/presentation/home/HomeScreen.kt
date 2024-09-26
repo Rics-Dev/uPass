@@ -34,6 +34,7 @@ fun HomeScreen(
     val viewModel = koinViewModel<HomeViewModel>()
     val accountsState by viewModel.accountsState.collectAsState()
     var showPasswordGenerator by remember { mutableStateOf(false) }
+    var show2faSetup by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
 
@@ -58,6 +59,9 @@ fun HomeScreen(
                 },
                 showPasswordGenerator = {
                     showPasswordGenerator = true
+                },
+                show2faSetup = {
+                    show2faSetup = true
                 }
             )
         },

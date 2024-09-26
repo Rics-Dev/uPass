@@ -10,7 +10,7 @@ data class Account(
     val username: String = "",
     val password: String = "",
     val urls: List<String> = listOf(""),
-    val twoFaSettings: TwoFaSettings? = null,
+    val twoFaSettings: TwoFaSettings? = TwoFaSettings(),
     val customFields: List<CustomField> = emptyList(),
     val note: String = ""
 )

@@ -75,7 +75,7 @@ fun PasswordGenerator(
                     clipboardManager.setText(AnnotatedString(passwordState.value))
                 }) {
                     Icon(Icons.Rounded.ContentPaste, contentDescription = "Copy Password")
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text("Copy")
                 }
             }

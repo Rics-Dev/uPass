@@ -63,12 +63,6 @@ class AccountViewModel(
         }
     }
 
-    fun initializeTwoFaSettings() {
-        _accountState.update {
-            it.copy(twoFaSettings = TwoFaSettings())
-        }
-    }
-
     fun updateTwoFaSettings(twoFaSettings: TwoFaSettings) {
         _accountState.update {
             it.copy(twoFaSettings = twoFaSettings)

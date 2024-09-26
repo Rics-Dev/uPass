@@ -23,12 +23,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.ricsdev.uconnect.PlatformType
 import com.ricsdev.uconnect.domain.model.CustomField
 import com.ricsdev.uconnect.domain.model.CustomFieldType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
+import com.ricsdev.uconnect.getPlatform
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
 import org.koin.compose.viewmodel.koinViewModel
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +41,7 @@ fun NewAccountScreen(
     val viewModel = koinViewModel<AccountViewModel>()
     val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     var showPasswordGenerator by remember { mutableStateOf(false) }
+    var show2faSetup by remember { mutableStateOf(false) }
 
 
 
@@ -133,13 +135,27 @@ fun NewAccountScreen(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "2FA Setup",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-                AnimatedVisibility(visible = accountState.twoFaSettings == null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "2FA Setup",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    AnimatedVisibility(visible = show2faSetup) {
+                        IconButton(
+                            onClick = { show2faSetup = false },
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        ) {
+                            Icon(Icons.Outlined.Close, contentDescription = "Discard 2fa")
+                        }
+                    }
+                }
+                AnimatedVisibility(visible = !show2faSetup) {
                     Button(
-                        onClick = { viewModel.initializeTwoFaSettings() },
+                        onClick = { show2faSetup = true },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -148,7 +164,7 @@ fun NewAccountScreen(
                     }
                 }
 
-                AnimatedVisibility(visible = accountState.twoFaSettings != null) {
+                AnimatedVisibility(visible = show2faSetup) {
                     TwoFaSettingsSection(
                         twoFaSettings = accountState.twoFaSettings!!,
                         onTwoFaSettingsChange = { viewModel.updateTwoFaSettings(it) }
@@ -418,7 +434,12 @@ fun CustomFieldInput(
                     )
                 }
             }
-            IconButton(onClick = onRemoveField) {
+            ElevatedButton(
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier.size(48.dp),
+                onClick = onRemoveField
+            ) {
                 Icon(Icons.Rounded.Remove, contentDescription = "Remove Field")
             }
         }
@@ -474,6 +495,7 @@ fun AccountItem(
     readOnly: Boolean = false,
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
+    val platform = getPlatform()
 
     Row(
         modifier = Modifier
@@ -497,13 +519,16 @@ fun AccountItem(
                                 contentDescription = if (isPasswordVisible) "Hide Password" else "Show Password"
                             )
                         }
-                        IconButton(onClick = {
-                            showPasswordGenerator()
-                        }) {
-                            Icon(
-                                imageVector = if (isPassword) Icons.Outlined.LockReset else Icons.Outlined.QrCodeScanner,
-                                contentDescription = "Generate Password"
-                            )
+                        if(isPassword){
+                            IconButton(onClick = { showPasswordGenerator() }) {
+                                Icon(imageVector = Icons.Outlined.LockReset, contentDescription = "Generate Password")
+                            }
+                        }else{
+                            if(platform.type == PlatformType.ANDROID){
+                                IconButton(onClick = {  }) { //qr code scanner
+                                    Icon(imageVector = Icons.Outlined.QrCodeScanner, contentDescription = "Generate Password")
+                                }
+                            }
                         }
                     }
                 }
