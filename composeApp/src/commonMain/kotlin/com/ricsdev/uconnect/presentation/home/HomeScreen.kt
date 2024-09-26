@@ -23,6 +23,7 @@ import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.getPlatform
 import com.ricsdev.uconnect.navigation.Screens
 import com.ricsdev.uconnect.presentation.home.components.HomeFloatingActionButton
+import com.ricsdev.uconnect.presentation.home.components.modal.TwoFaSetup
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -120,6 +121,12 @@ fun HomeScreen(
     if (showPasswordGenerator) {
         PasswordGenerator(
             onDismiss = { showPasswordGenerator = false },
+        )
+    }
+
+    if (show2faSetup) {
+        TwoFaSetup(
+            onDismiss = { show2faSetup = false },
         )
     }
 }

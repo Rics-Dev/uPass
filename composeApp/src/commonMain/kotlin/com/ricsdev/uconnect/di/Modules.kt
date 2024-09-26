@@ -8,6 +8,7 @@ import com.ricsdev.uconnect.domain.usecase.GetAllAccountsUseCase
 import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
 import com.ricsdev.uconnect.presentation.account.AccountViewModel
 import com.ricsdev.uconnect.presentation.home.HomeViewModel
+import com.ricsdev.uconnect.presentation.home.components.modal.TwoFaSetupViewModel
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGeneratorViewModel
 import com.ricsdev.uconnect.util.CryptoManager
 import org.koin.core.module.Module
@@ -42,4 +43,5 @@ val sharedModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::AccountViewModel)
     viewModelOf(::PasswordGeneratorViewModel)
+    viewModelOf(::TwoFaSetupViewModel)
 }
