@@ -2,7 +2,6 @@ package com.ricsdev.uconnect.di
 
 import com.ricsdev.uconnect.data.repository.RepositoryImpl
 import com.ricsdev.uconnect.data.source.local.AppDatabase
-import com.ricsdev.uconnect.data.source.local.getRoomDatabase
 import com.ricsdev.uconnect.domain.repository.Repository
 import com.ricsdev.uconnect.domain.usecase.GetAccountUseCase
 import com.ricsdev.uconnect.domain.usecase.GetAllAccountsUseCase
@@ -23,7 +22,6 @@ expect val platformModule: Module
 
 
 val sharedModule = module {
-    singleOf(::getRoomDatabase)
     single { get<AppDatabase>().accountDao() }
 
     // Repository
@@ -38,7 +36,6 @@ val sharedModule = module {
     singleOf(::CryptoManager)
 
 
-//    viewModel { SetupViewModel(get(), get()) }
 
 
     // ViewModels

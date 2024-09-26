@@ -39,6 +39,18 @@ kotlin {
             // Required when using NativeSQLiteDriver
             linkerOpts.add("-lsqlite3")
         }
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            freeCompilerArgs.add("-Xexpect-actual-classes")
+        }
+    }
+
+
+
+    // Room step6 part1 for adding ksp src directory to use AppDatabase::class.instantiateImpl() in iosMain:
+    // Due to https://issuetracker.google.com/u/0/issues/342905180
+    sourceSets.commonMain {
+        kotlin.srcDir("build/generated/ksp/metadata")
     }
 
     sourceSets {
@@ -81,16 +93,11 @@ kotlin {
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
 
-
             implementation(libs.adaptive)
             implementation(libs.adaptive.layout)
             implementation(libs.adaptive.navigation)
             implementation(libs.material3.adaptive.navigation.suite)
             implementation(libs.material3.window.size.classe)
-
-
-
-
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -111,6 +118,7 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+
 
     defaultConfig {
         applicationId = "com.ricsdev.uconnect"
@@ -157,12 +165,26 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
-
 dependencies {
-    add("kspCommonMainMetadata", libs.room.compiler)
-    add("kspAndroid", libs.room.compiler)
-    add("kspDesktop", libs.room.compiler)
-    add("kspIosX64", libs.room.compiler)
-    add("kspIosArm64", libs.room.compiler)
-//    add("kspIosSimulatorArm64", libs.room.compiler)
+
+    // Update: https://issuetracker.google.com/u/0/issues/342905180
+    add("kspCommonMainMetadata", "androidx.room:room-compiler:2.7.0-alpha04")
+
 }
+
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}
+
+
+//dependencies {
+//    add("kspAndroid", libs.room.compiler)
+//    // Remove or comment out the following lines
+//    // add("kspDesktop", libs.room.compiler)
+//    // add("kspIosX64", libs.room.compiler)
+//    // add("kspIosArm64", libs.room.compiler)
+//    // add("kspIosSimulatorArm64", libs.room.compiler)
+//}

@@ -357,7 +357,9 @@ fun CustomFieldInput(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor()
+                    .menuAnchor(
+                        type = MenuAnchorType.PrimaryNotEditable
+                    )
             )
             ExposedDropdownMenu(
                 modifier = Modifier.fillMaxWidth(),
@@ -543,7 +545,9 @@ fun TwoFaTypeDropdown(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor()
+                .menuAnchor(
+                    type = MenuAnchorType.PrimaryNotEditable
+                )
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -588,7 +592,9 @@ fun HashFunctionDropdown(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor()
+                .menuAnchor(
+                    type = MenuAnchorType.PrimaryNotEditable
+                )
         )
         ExposedDropdownMenu(
             expanded = expanded,
