@@ -90,9 +90,12 @@ actual class SecureStorage {
         }
     }
 
-    actual fun isMasterPasswordSet(): Flow<Boolean> = flow {
-        emit(preferences.get("master_password", null) != null)
+
+    actual suspend fun isMasterPasswordSet(): Boolean = withContext(Dispatchers.IO) {
+        (preferences.get("master_password", null) != null)
     }
+
+
 
     private fun generateOrRetrieveSalt(): ByteArray {
         val storedSalt = preferences.getByteArray("salt", null)
@@ -138,6 +141,14 @@ actual class SecureStorage {
         return cipher.doFinal(encryptedData)
     }
 
+
+    // biometry setup
+    actual suspend fun isBiometricEnabled(): Boolean = withContext(Dispatchers.IO) {
+         false
+    }
+
+    actual fun saveBiometricState(biometricState: Boolean) {
+    }
 
 
 

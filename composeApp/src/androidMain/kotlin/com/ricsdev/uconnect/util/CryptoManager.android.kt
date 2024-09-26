@@ -47,16 +47,33 @@ actual class SecureStorage(private val context: Context) {
         }
     }
 
-    actual suspend fun verifyMasterPassword(password: String): Boolean = withContext(Dispatchers.IO) {
+    actual suspend fun verifyMasterPassword(password: String): Boolean = withContext(Dispatchers.IO)
+    {
+        sharedPreferences.getString("master_password", null) == password
+    }
+
+
+    actual suspend fun isMasterPasswordSet(): Boolean = withContext(Dispatchers.IO) {
         sharedPreferences.contains("master_password")
     }
 
 
-    actual fun isMasterPasswordSet(): Flow<Boolean> = flow {
-        emit(sharedPreferences.contains("master_password"))
+    private fun ByteArray.encodeBase64(): String =
+        android.util.Base64.encodeToString(this, android.util.Base64.DEFAULT)
+
+    private fun String.decodeBase64(): ByteArray =
+        android.util.Base64.decode(this, android.util.Base64.DEFAULT)
+
+
+
+
+
+    // biometry setup
+    actual suspend fun isBiometricEnabled(): Boolean = withContext(Dispatchers.IO) {
+        sharedPreferences.getBoolean("biometric_enabled", false)
     }
 
-
-    private fun ByteArray.encodeBase64(): String = android.util.Base64.encodeToString(this, android.util.Base64.DEFAULT)
-    private fun String.decodeBase64(): ByteArray = android.util.Base64.decode(this, android.util.Base64.DEFAULT)
+    actual fun saveBiometricState(biometricState: Boolean) {
+        sharedPreferences.edit().putBoolean("biometric_enabled", biometricState).apply()
+    }
 }
