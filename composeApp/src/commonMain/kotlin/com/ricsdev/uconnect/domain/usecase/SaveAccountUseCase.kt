@@ -6,5 +6,5 @@ import com.ricsdev.uconnect.domain.repository.Repository
 class SaveAccountUseCase(
     private val repository: Repository
 ) {
-    suspend fun execute(account: Account) = repository.saveAccount(account)
+    suspend operator fun invoke(account: Account) = repository.saveAccount(account)
 }

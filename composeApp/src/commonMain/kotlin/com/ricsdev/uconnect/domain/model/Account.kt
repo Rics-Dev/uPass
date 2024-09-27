@@ -17,14 +17,12 @@ data class Account(
 
 @Serializable
 data class TwoFaSettings(
-    val issuer: String = "",
-    val accountName: String = "",
     val secret: String = "",
     val type: OtpType = OtpType.TOTP,
     val hmacAlgorithm: HmacAlgorithm = HmacAlgorithm.SHA1,
     val period: OtpPeriod = OtpPeriod.Thirty,
     val digits: OtpDigits = OtpDigits.Six,
-    val counter: Long = 0 // Only used for HOTP
+    val counter: Long = 0
 )
 
 @Serializable

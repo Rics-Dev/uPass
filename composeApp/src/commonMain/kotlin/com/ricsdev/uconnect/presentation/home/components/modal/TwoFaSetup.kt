@@ -40,10 +40,6 @@ import com.ricsdev.uconnect.domain.model.OtpDigits
 import com.ricsdev.uconnect.domain.model.OtpPeriod
 import com.ricsdev.uconnect.domain.model.OtpType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
-import com.ricsdev.uconnect.presentation.account.HashFunctionDropdown
-import com.ricsdev.uconnect.presentation.account.TwoFaTypeDropdown
-import kotlinx.coroutines.launch
-import kotlin.math.pow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +89,7 @@ fun TwoFaSetup(
                 2 -> SetupManually(
                     viewModel = viewModel,
                     twoFaSettings = accountState.twoFaSettings!!,
-                    onTwoFaSettingsChange = { viewModel.updateTwoFaSettings(it) },
+                    onTwoFaSettingsChange = {  },
                     onChangeCurrentTab = { selectedTab = it }
                 )
 
@@ -114,9 +110,8 @@ fun SetupManually(
     onTwoFaSettingsChange: (TwoFaSettings) -> Unit,
     onChangeCurrentTab: (Int) -> Unit,
 ) {
-    var issuer by remember { mutableStateOf(twoFaSettings.issuer) }
-    var accountName by remember { mutableStateOf(twoFaSettings.accountName) }
-    var secretKey by remember { mutableStateOf(twoFaSettings.secret) }
+
+    val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     var is2faSettingsExpanded by remember { mutableStateOf(false) }
 
     Column(
@@ -136,22 +131,16 @@ fun SetupManually(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             OutlinedTextField(
-                value = issuer,
-                onValueChange = {
-                    issuer = it
-                    onTwoFaSettingsChange(twoFaSettings.copy(issuer = it))
-                },
-                label = { Text("Issuer") },
+                value = accountState.name,
+                onValueChange = { viewModel.updateAccountState(accountState.copy(name = it)) },
+                label = { Text("Account") },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))
             OutlinedTextField(
-                value = accountName,
-                onValueChange = {
-                    accountName = it
-                    onTwoFaSettingsChange(twoFaSettings.copy(accountName = it))
-                },
-                label = { Text("Account Name") },
+                value = accountState.username,
+                onValueChange = { viewModel.updateAccountState(accountState.copy(username = it)) },
+                label = { Text("Username") },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -162,10 +151,11 @@ fun SetupManually(
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = secretKey,
-            onValueChange = {
-                secretKey = it
-                onTwoFaSettingsChange(twoFaSettings.copy(secret = it))
+            value = accountState.twoFaSettings!!.secret,
+            onValueChange = { newSecret ->
+                accountState.twoFaSettings?.let { settings ->
+                    viewModel.updateAccountState(accountState.copy(twoFaSettings = settings.copy(secret = newSecret)))
+                }
             },
             label = { Text("Secret Key") },
             modifier = Modifier.fillMaxWidth()

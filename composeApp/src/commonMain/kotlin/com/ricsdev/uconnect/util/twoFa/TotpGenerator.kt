@@ -8,9 +8,8 @@ import kotlin.math.floor
 class TotpGenerator(
     secret: String,
     private val settings: TwoFaSettings,
-    cryptoManager: CryptoManager,
 ) {
-    private val hotpGenerator: HotpGenerator = HotpGenerator(secret, settings, cryptoManager)
+    private val hotpGenerator: HotpGenerator = HotpGenerator(secret, settings)
 
     private fun counter(timestamp: Long): Long {
         val millis = settings.period.millis

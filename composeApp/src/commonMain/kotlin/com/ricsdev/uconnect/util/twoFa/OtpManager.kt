@@ -10,15 +10,15 @@ import kotlinx.datetime.Clock
 import kotlin.math.floor
 
 
-class OtpManager(private val cryptoManager: CryptoManager) {
+class OtpManager {
     fun generateOtp(settings: TwoFaSettings, timestamp: Long): String {
         return when (settings.type) {
             OtpType.TOTP -> {
-                val generator = TotpGenerator(settings.secret, settings, cryptoManager)
+                val generator = TotpGenerator(settings.secret, settings)
                 generator.generate(timestamp)
             }
             OtpType.HOTP -> {
-                val generator = HotpGenerator(settings.secret, settings, cryptoManager)
+                val generator = HotpGenerator(settings.secret, settings)
                 generator.generate(settings.counter)
             }
         }
@@ -26,7 +26,7 @@ class OtpManager(private val cryptoManager: CryptoManager) {
 
     fun timeslotLeft(settings: TwoFaSettings, timestamp: Long): Double {
         return if (settings.type == OtpType.TOTP) {
-            val generator = TotpGenerator(settings.secret, settings, cryptoManager)
+            val generator = TotpGenerator(settings.secret, settings)
             generator.timeslotLeft(timestamp)
         } else {
             1.0

@@ -6,7 +6,7 @@ import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
 import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
 import com.ricsdev.uconnect.util.twoFa.OtpManager
-import com.ricsdev.uconnect.util.twoFa.isValidBase32Secret
+import com.ricsdev.uconnect.util.twoFa.isValidBase32
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -22,25 +22,23 @@ class TwoFaSetupViewModel(
     val accountState: StateFlow<Account> = _accountState
 
 
-    fun updateTwoFaSettings(twoFaSettings: TwoFaSettings) {
-        _accountState.update {
-            it.copy(twoFaSettings = twoFaSettings)
-        }
+    fun updateAccountState(account: Account) {
+        _accountState.update { account }
     }
 
 
     fun saveAccount() {
         viewModelScope.launch {
-            if(_accountState.value.twoFaSettings != null){
-                if(_accountState.value.twoFaSettings!!.secret.isValidBase32Secret){
-                    saveAccountUseCase.execute(_accountState.value)
-                }else{
-                    println("Not a valid base 32 secret")
-                }
-
-            }else{
-
+            val twoFaSettings = _accountState.value.twoFaSettings
+            if (twoFaSettings == null) {
+                println("TwoFaSettings is null")
+                return@launch
             }
+            if (!twoFaSettings.secret.isValidBase32) {
+                println("Not a valid base 32 secret")
+                return@launch
+            }
+            saveAccountUseCase(_accountState.value)
         }
     }
 

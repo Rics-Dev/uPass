@@ -100,7 +100,7 @@ class AccountViewModel(
     fun saveAccount() {
         viewModelScope.launch {
             val account = _accountState.value
-            saveAccountUseCase.execute(account)
+            saveAccountUseCase(account)
         }
     }
 }

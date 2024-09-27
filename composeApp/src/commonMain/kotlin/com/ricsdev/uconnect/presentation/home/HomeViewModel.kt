@@ -19,15 +19,19 @@ import kotlinx.datetime.Clock
 
 class HomeViewModel(
     private val getAllAccountsUseCase: GetAllAccountsUseCase,
-    private val cryptoManager: CryptoManager,
     private val otpManager: OtpManager
 ) : ViewModel() {
 
     private val _accountsState = MutableStateFlow<UiState<List<Account>>>(UiState.Loading)
     val accountsState: StateFlow<UiState<List<Account>>> = _accountsState
 
-    private val otpMap = mutableMapOf<Int, MutableStateFlow<String?>>()
-    private val remainingTimeMap = mutableMapOf<Int, MutableStateFlow<Int>>()
+    private val _otpMap = MutableStateFlow<Map<Int, String?>>(emptyMap())
+    val otpMap: StateFlow<Map<Int, String?>> = _otpMap
+
+    private val _remainingTimeMap = MutableStateFlow<Map<Int, Int>>(emptyMap())
+    val remainingTimeMap: StateFlow<Map<Int, Int>> = _remainingTimeMap
+
+
 
     init {
         fetchAccounts()
@@ -55,24 +59,16 @@ class HomeViewModel(
             while (isActive) {
                 val timestamp = Clock.System.now().toEpochMilliseconds()
                 val otp = otpManager.generateOtp(settings, timestamp)
-                otpMap[accountId]?.value = otp
+                _otpMap.value = _otpMap.value.toMutableMap().apply { put(accountId, otp) }
 
                 if (settings.type == OtpType.TOTP) {
                     val remainingTime = (otpManager.timeslotLeft(settings, timestamp) * settings.period.millis).toInt()
-                    remainingTimeMap[accountId]?.value = remainingTime / 1000 // Convert to seconds
-                    delay(1000) // Update every second
-                } else {
-                    delay(30_000) // Default delay for HOTP
+                    _remainingTimeMap.value = _remainingTimeMap.value.toMutableMap().apply { put(accountId, remainingTime / 1000) }
+                    delay(500) // Update every second
                 }
             }
         }
     }
 
-    fun getCurrentOtp(accountId: Int): StateFlow<String?> {
-        return otpMap.getOrPut(accountId) { MutableStateFlow(null) }
-    }
 
-    fun getRemainingTime(accountId: Int): StateFlow<Int> {
-        return remainingTimeMap.getOrPut(accountId) { MutableStateFlow(30) }
-    }
 }
