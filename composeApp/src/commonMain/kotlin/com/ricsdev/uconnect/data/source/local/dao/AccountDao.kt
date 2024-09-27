@@ -1,6 +1,7 @@
 package com.ricsdev.uconnect.data.source.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -17,4 +18,8 @@ interface AccountDao {
 
     @Query("SELECT * FROM accounts")
     fun getAllAccounts(): Flow<List<AccountEntity>>
+
+
+    @Delete
+    suspend fun deleteAccount(account: AccountEntity)
 }

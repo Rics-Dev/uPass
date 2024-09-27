@@ -3,6 +3,7 @@ package com.ricsdev.uconnect.di
 import com.ricsdev.uconnect.data.repository.RepositoryImpl
 import com.ricsdev.uconnect.data.source.local.AppDatabase
 import com.ricsdev.uconnect.domain.repository.Repository
+import com.ricsdev.uconnect.domain.usecase.DeleteAccountUseCase
 import com.ricsdev.uconnect.domain.usecase.GetAccountUseCase
 import com.ricsdev.uconnect.domain.usecase.GetAllAccountsUseCase
 import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
@@ -33,6 +34,7 @@ val sharedModule = module {
     singleOf(::GetAllAccountsUseCase)
     singleOf(::GetAccountUseCase)
     singleOf(::SaveAccountUseCase)
+    singleOf(::DeleteAccountUseCase)
 
     // Utilities
     singleOf(::CryptoManager)

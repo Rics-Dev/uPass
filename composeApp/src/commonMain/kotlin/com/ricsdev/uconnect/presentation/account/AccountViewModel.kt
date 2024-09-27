@@ -6,6 +6,7 @@ import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.domain.model.CustomField
 import com.ricsdev.uconnect.domain.model.CustomFieldType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
+import com.ricsdev.uconnect.domain.usecase.DeleteAccountUseCase
 import com.ricsdev.uconnect.domain.usecase.GetAccountUseCase
 import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 class AccountViewModel(
     private val saveAccountUseCase: SaveAccountUseCase,
     private val getAccountUseCase: GetAccountUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase,
 ) : ViewModel() {
     private val _accountState = MutableStateFlow(Account())
     val accountState: StateFlow<Account> = _accountState
@@ -25,6 +27,13 @@ class AccountViewModel(
         viewModelScope.launch {
             val account = getAccountUseCase(accountId)
             _accountState.value = account ?: Account()
+        }
+    }
+
+    fun deleteAccount(account: Account) {
+        viewModelScope.launch {
+            println(account.id)
+            deleteAccountUseCase(account)
         }
     }
 

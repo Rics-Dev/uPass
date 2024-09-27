@@ -166,7 +166,7 @@ compose.desktop {
         mainClass = "com.ricsdev.uconnect.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
             packageName = "com.ricsdev.uconnect"
             packageVersion = "1.0.0"
         }

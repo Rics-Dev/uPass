@@ -43,7 +43,7 @@ class HomeViewModel(
                 getAllAccountsUseCase().collect { accounts ->
                     _accountsState.value = UiState.Success(accounts)
                     accounts.forEach { account ->
-                        if (account.twoFaSettings != null) {
+                        if (account.twoFaSettings?.secret!!.isNotEmpty()) {
                             generateOtp(account.id, account.twoFaSettings)
                         }
                     }

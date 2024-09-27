@@ -13,5 +13,4 @@ fun App() {
             AppNavigation()
         }
     }
-
 }

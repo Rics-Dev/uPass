@@ -31,7 +31,6 @@ class RepositoryImpl(
         try {
             val accountData = Json.encodeToString(account).encodeToByteArray()
             val encryptedData = cryptoManager.encrypt(accountData)
-            println("Encrypted data: ${encryptedData.decodeToString()}")
             val accountEntity = AccountEntity(encryptedData = encryptedData)
             accountDao.insertAccount(accountEntity)
         } catch (e: Exception) {
@@ -46,7 +45,18 @@ class RepositoryImpl(
         if (decryptedData.isEmpty()) {
             return null
         }
-        return Json.decodeFromString<Account>(decryptedData.decodeToString())
+        val account = Json.decodeFromString<Account>(decryptedData.decodeToString())
+        return account.copy(id = accountEntity.id)
+    }
+
+
+    override suspend fun deleteAccount(account: Account) {
+        try {
+            val accountEntity = accountDao.getAccount(account.id) ?: return
+            accountDao.deleteAccount(accountEntity)
+        } catch (e: Exception) {
+            println("Error deleting account: ${e.message}")
+        }
     }
 
     override fun getAllAccounts(): Flow<List<Account>> =
