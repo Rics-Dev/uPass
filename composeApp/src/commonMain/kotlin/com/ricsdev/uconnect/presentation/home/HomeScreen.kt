@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Facebook
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Shield
@@ -21,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -208,18 +211,28 @@ fun AccountCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
-                    Text(
-                        text = account.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = getAccountIcon(account.name),
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = account.username,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = account.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = account.username,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
                 }
                 Row {
                     IconButton(onClick = {
@@ -263,7 +276,7 @@ fun AccountCard(
                             modifier = Modifier.size(40.dp)
                         ) {
                             val circleColor = MaterialTheme.colorScheme.primary
-                            val remainingFraction = remainingTime / 30f // Assuming 30 seconds is the full time
+                            val remainingFraction = remainingTime / account.twoFaSettings.period.seconds.toFloat() // full time
                             val animatedFraction by animateFloatAsState(targetValue = remainingFraction)
 
                             Canvas(modifier = Modifier.size(40.dp)) {
@@ -324,5 +337,14 @@ fun AccountCard(
                 }
             }
         }
+    }
+}
+
+fun getAccountIcon(accountName: String): ImageVector {
+    return when (accountName.lowercase()) {
+        "facebook" -> Icons.Outlined.Facebook
+        "twitter" -> Icons.Outlined.AccountCircle
+        "email" -> Icons.Outlined.Email
+        else -> Icons.Outlined.AccountCircle // Default icon
     }
 }
