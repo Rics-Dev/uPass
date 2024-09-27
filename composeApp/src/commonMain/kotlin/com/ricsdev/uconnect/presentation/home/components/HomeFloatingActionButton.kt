@@ -111,13 +111,13 @@ fun HomeFloatingActionButton(
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
-        val rotationAngle by animateFloatAsState(if (isExpanded) 180f else 0f)
+        val rotationAngle by animateFloatAsState(if (isExpanded) 135f else 0f)
 
         FloatingActionButton(
             onClick = { isExpanded = !isExpanded }
         ) {
             Icon(
-                imageVector = if (isExpanded) Icons.Filled.Remove else Icons.Filled.Add,
+                imageVector = Icons.Filled.Add,
                 contentDescription = if (isExpanded) "Close" else "Add",
                 modifier = Modifier.graphicsLayer {
                     rotationZ = rotationAngle

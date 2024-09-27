@@ -199,6 +199,10 @@ fun AccountCard(
     val currentOtp = otpMap[account.id]
     val remainingTime = remainingTimeMap[account.id] ?: 30
     var isOtpVisible by remember { mutableStateOf(false) }
+    val otpColor = if (remainingTime <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+    val circleColor = if (remainingTime <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+
+    val spacedOtp = currentOtp?.chunked(3)?.joinToString("  ")
 
 
 
@@ -285,7 +289,6 @@ fun AccountCard(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.size(40.dp)
                         ) {
-                            val circleColor = MaterialTheme.colorScheme.primary
                             val remainingFraction = remainingTime / account.twoFaSettings.period.seconds.toFloat() // full time
                             val animatedFraction by animateFloatAsState(targetValue = remainingFraction)
 
@@ -301,22 +304,22 @@ fun AccountCard(
                             Text(
                                 text = "$remainingTime",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.secondary
+                                color = otpColor
                             )
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         AnimatedVisibility(visible = isOtpVisible) {
                             Text(
-                                text = currentOtp,
+                                text = spacedOtp ?: currentOtp,
                                 style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = otpColor,
                             )
                         }
                         AnimatedVisibility(visible = !isOtpVisible) {
                             Text(
-                                text = currentOtp.map { "* " }.joinToString(""),
+                                text = spacedOtp?.map { "* " }?.joinToString("") ?: currentOtp.map { "* " }.joinToString(""),
                                 style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = otpColor,
                             )
                         }
                     }

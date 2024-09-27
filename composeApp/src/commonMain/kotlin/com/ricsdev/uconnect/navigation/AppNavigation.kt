@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.ricsdev.uconnect.presentation.account.AccountDetailsScreen
-import com.ricsdev.uconnect.presentation.account.NewAccountScreen
+import com.ricsdev.uconnect.presentation.account.AddAccountScreen
 import com.ricsdev.uconnect.presentation.home.HomeScreen
 import com.ricsdev.uconnect.presentation.setupScreen.SetupScreen
 
@@ -44,7 +44,7 @@ fun AppNavigation(
                 slideOutVertically(targetOffsetY = { it }) + fadeOut()
             }
         ) {
-            NewAccountScreen(navController)
+            AddAccountScreen(navController)
         }
 
 

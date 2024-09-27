@@ -9,7 +9,7 @@ data class Account(
     val name: String = "",
     val username: String = "",
     val password: String = "",
-    val urls: List<String> = listOf(""),
+    val url: String = "",
     val twoFaSettings: TwoFaSettings? = TwoFaSettings(),
     val customFields: List<CustomField> = emptyList(),
     val note: String = ""

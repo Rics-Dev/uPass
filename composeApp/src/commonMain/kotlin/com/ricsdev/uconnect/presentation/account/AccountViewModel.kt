@@ -38,44 +38,8 @@ class AccountViewModel(
     }
 
 
-    fun updateAccountName(name: String) {
-        _accountState.update { it.copy(name = name) }
-    }
-
-    fun updateUsername(username: String) {
-        _accountState.update { it.copy(username = username) }
-    }
-
-    fun updatePassword(password: String) {
-        _accountState.update { it.copy(password = password) }
-    }
-
-    fun updateUrl(index: Int, url: String) {
-        _accountState.update {
-            val updatedUrls = it.urls.toMutableList()
-            updatedUrls[index] = url
-            it.copy(urls = updatedUrls)
-        }
-    }
-
-    fun addUrl() {
-        _accountState.update {
-            it.copy(urls = it.urls + "")
-        }
-    }
-
-    fun removeUrl(index: Int) {
-        _accountState.update {
-            val updatedUrls = it.urls.toMutableList()
-            updatedUrls.removeAt(index)
-            it.copy(urls = updatedUrls)
-        }
-    }
-
-    fun updateTwoFaSettings(twoFaSettings: TwoFaSettings) {
-        _accountState.update {
-            it.copy(twoFaSettings = twoFaSettings)
-        }
+    fun updateAccountState(account: Account) {
+        _accountState.update { account }
     }
 
     fun updateCustomField(index: Int, field: CustomField) {
@@ -102,9 +66,6 @@ class AccountViewModel(
         }
     }
 
-    fun updateNote(note: String) {
-        _accountState.update { it.copy(note = note) }
-    }
 
     fun saveAccount() {
         viewModelScope.launch {

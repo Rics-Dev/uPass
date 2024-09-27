@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -16,7 +17,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -33,12 +38,13 @@ import com.ricsdev.uconnect.presentation.home.components.modal.OtpDigitsDropdown
 import com.ricsdev.uconnect.presentation.home.components.modal.OtpTypeDropdown
 import com.ricsdev.uconnect.presentation.home.components.modal.TotpPeriodDropdown
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
+import com.ricsdev.uconnect.util.twoFa.isValidBase32
 import org.koin.compose.viewmodel.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewAccountScreen(
+fun AddAccountScreen(
     navHostController: NavHostController
 ) {
 
@@ -46,8 +52,18 @@ fun NewAccountScreen(
     val accountState by viewModel.accountState.collectAsStateWithLifecycle()
     var showPasswordGenerator by remember { mutableStateOf(false) }
     var show2faSetup by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf<String?>(null) }
 
 
+    val keyboard = LocalSoftwareKeyboardController.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(snackbarMessage) {
+        snackbarMessage?.let {
+            snackbarHostState.showSnackbar(it)
+            snackbarMessage = null
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -66,15 +82,27 @@ fun NewAccountScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            viewModel.saveAccount()
-                            navHostController.navigateUp()
+                            when {
+                                accountState.name.isEmpty() -> {
+                                    snackbarMessage = "Account name is required"
+                                }
+                                accountState.twoFaSettings?.secret?.isValidBase32 == false -> {
+                                    snackbarMessage = "Invalid 2FA secret"
+                                }
+                                else -> {
+                                    viewModel.saveAccount()
+                                    navHostController.navigateUp()
+                                    keyboard?.hide()
+                                }
+                            }
                         }
                     ) {
                         Icon(Icons.Outlined.Save, contentDescription = "save account")
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -92,21 +120,47 @@ fun NewAccountScreen(
                     icon = Icons.Outlined.Public,
                     label = "Account",
                     value = accountState.name,
-                    onValueChange = { viewModel.updateAccountName(it) },
+                    onValueChange = { viewModel.updateAccountState(accountState.copy(name = it)) },
                     keyboardType = KeyboardType.Text
                 )
+                Row(
+                    modifier = Modifier.padding(horizontal = 48.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = when {
+                            accountState.name.isEmpty() -> Icons.Outlined.Info
+                            else -> Icons.Outlined.Check
+                        },
+                        contentDescription = "Info icon",
+                        modifier = Modifier.size(14.dp),
+                        tint = when {
+                            accountState.name.isEmpty() -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+                    )
+                    Text(
+                        "Required",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = when {
+                            accountState.name.isEmpty() -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            else -> MaterialTheme.colorScheme.primary
+                        }
+                    )
+                }
                 AccountItem(
                     icon = Icons.Outlined.AccountCircle,
                     label = "Username / Email",
                     value = accountState.username,
-                    onValueChange = { viewModel.updateUsername(it) },
+                    onValueChange = { viewModel.updateAccountState(accountState.copy(username = it))},
                     keyboardType = KeyboardType.Email
                 )
                 AccountItem(
                     icon = Icons.Outlined.Password,
                     label = "Password",
                     value = accountState.password,
-                    onValueChange = { viewModel.updatePassword(it) },
+                    onValueChange = { viewModel.updateAccountState(accountState.copy(password = it)) },
                     isPassword = true,
                     showPasswordGenerator = {
                         showPasswordGenerator = true
@@ -117,27 +171,18 @@ fun NewAccountScreen(
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
 
-                accountState.urls.forEachIndexed { index, url ->
-                    UrlInputField(
-                        url = url,
-                        onUrlChange = { newUrl -> viewModel.updateUrl(index, newUrl) },
-                        onRemoveUrl = { viewModel.removeUrl(index) },
-                        index = index,
-                        urlListSize = accountState.urls.size
-                    )
-                }
-                Button(
-                    onClick = { viewModel.addUrl() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text("Add another URL")
-                }
+
+                AccountItem(
+                    icon = Icons.Outlined.Link,
+                    label = "Url",
+                    value = accountState.url,
+                    onValueChange = { viewModel.updateAccountState(accountState.copy(url = it)) },
+                    keyboardType = KeyboardType.Uri
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -171,7 +216,7 @@ fun NewAccountScreen(
                 AnimatedVisibility(visible = show2faSetup) {
                     TwoFaSettingsSection(
                         twoFaSettings = accountState.twoFaSettings!!,
-                        onTwoFaSettingsChange = { viewModel.updateTwoFaSettings(it) }
+                        onTwoFaSettingsChange = { viewModel.updateAccountState(accountState.copy(twoFaSettings = it)) }
                     )
                 }
 
@@ -197,7 +242,7 @@ fun NewAccountScreen(
 
                 NoteSection(
                     note = accountState.note,
-                    onNoteChange = { viewModel.updateNote(it) }
+                    onNoteChange = { viewModel.updateAccountState(accountState.copy(note = it)) }
                 )
 
             }
@@ -209,7 +254,7 @@ fun NewAccountScreen(
         PasswordGenerator(
             isAddingAccount = true,
             usePassword = { password ->
-                viewModel.updatePassword(password)
+                viewModel.updateAccountState(accountState.copy(password = password))
                 showPasswordGenerator = false
 
             },
@@ -273,7 +318,13 @@ fun TwoFaSettingsSection(
                     HmacAlgorithmDropdown(
                         modifier = Modifier.weight(1f),
                         selectedAlgorithm = twoFaSettings.hmacAlgorithm,
-                        onAlgorithmSelected = { onTwoFaSettingsChange(twoFaSettings.copy(hmacAlgorithm = it)) }
+                        onAlgorithmSelected = {
+                            onTwoFaSettingsChange(
+                                twoFaSettings.copy(
+                                    hmacAlgorithm = it
+                                )
+                            )
+                        }
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -495,6 +546,7 @@ fun AccountItem(
     showPasswordGenerator: () -> Unit = {},
     keyboardType: KeyboardType,
     readOnly: Boolean = false,
+    focusRequester: FocusRequester = FocusRequester(),
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
     val platform = getPlatform()
@@ -521,14 +573,20 @@ fun AccountItem(
                                 contentDescription = if (isPasswordVisible) "Hide Password" else "Show Password"
                             )
                         }
-                        if(isPassword){
+                        if (isPassword) {
                             IconButton(onClick = { showPasswordGenerator() }) {
-                                Icon(imageVector = Icons.Outlined.LockReset, contentDescription = "Generate Password")
+                                Icon(
+                                    imageVector = Icons.Outlined.LockReset,
+                                    contentDescription = "Generate Password"
+                                )
                             }
-                        }else{
-                            if(platform.type == PlatformType.ANDROID){
-                                IconButton(onClick = {  }) { //qr code scanner
-                                    Icon(imageVector = Icons.Outlined.QrCodeScanner, contentDescription = "Generate Password")
+                        } else {
+                            if (platform.type == PlatformType.ANDROID) {
+                                IconButton(onClick = { }) { //qr code scanner
+                                    Icon(
+                                        imageVector = Icons.Outlined.QrCodeScanner,
+                                        contentDescription = "Generate Password"
+                                    )
                                 }
                             }
                         }
@@ -538,10 +596,20 @@ fun AccountItem(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .focusRequester(focusRequester),
             visualTransformation = if ((isPassword || is2fa) && !isPasswordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = keyboardType,
+                imeAction = ImeAction.Next
+            ),
             readOnly = readOnly,
+            maxLines = 1,
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusRequester.requestFocus()
+                }
+            ),
         )
     }
 }
