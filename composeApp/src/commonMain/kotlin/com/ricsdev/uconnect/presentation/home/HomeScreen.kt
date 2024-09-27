@@ -3,6 +3,7 @@ package com.ricsdev.uconnect.presentation.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,7 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -36,7 +40,11 @@ import com.ricsdev.uconnect.navigation.Screens
 import com.ricsdev.uconnect.presentation.home.components.HomeFloatingActionButton
 import com.ricsdev.uconnect.presentation.home.components.modal.TwoFaSetup
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
+import com.ricsdev.uconnect.util.loadIcon
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import uconnect.composeapp.generated.resources.Res
+import uconnect.composeapp.generated.resources.jetbrains
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -192,6 +200,8 @@ fun AccountCard(
     val remainingTime = remainingTimeMap[account.id] ?: 30
     var isOtpVisible by remember { mutableStateOf(false) }
 
+
+
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -214,10 +224,10 @@ fun AccountCard(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        imageVector = getAccountIcon(account.name),
+                    Image(
+                        painter = loadIcon(account.name) ?: painterResource(Res.drawable.jetbrains),
                         contentDescription = null,
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(48.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
@@ -240,7 +250,7 @@ fun AccountCard(
                         if (!platform.name.contains("Android")) {
                             onShowSnackbar("Username copied to clipboard")
                         }
-                    }) {
+                    },) {
                         Icon(Icons.Outlined.AccountCircle, contentDescription = "Copy username")
                     }
                     IconButton(onClick = {
@@ -255,12 +265,12 @@ fun AccountCard(
             }
             if (account.twoFaSettings != null && currentOtp != null) {
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider(
                     modifier = Modifier.fillMaxWidth(),
                     thickness = 2.dp,
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
 
                 Row(
@@ -317,7 +327,7 @@ fun AccountCard(
                         }) {
                             Icon(
                                 imageVector = if (isOtpVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                                contentDescription = if (isOtpVisible) "Hide 2FA" else "Show 2FA"
+                                contentDescription = if (isOtpVisible) "Hide 2FA" else "Show 2FA",
                             )
                         }
                         IconButton(onClick = {
@@ -329,22 +339,9 @@ fun AccountCard(
                             Icon(Icons.Outlined.Key, contentDescription = "Copy 2fa")
                         }
                     }
-
-
-
-
-
                 }
             }
         }
     }
 }
 
-fun getAccountIcon(accountName: String): ImageVector {
-    return when (accountName.lowercase()) {
-        "facebook" -> Icons.Outlined.Facebook
-        "twitter" -> Icons.Outlined.AccountCircle
-        "email" -> Icons.Outlined.Email
-        else -> Icons.Outlined.AccountCircle // Default icon
-    }
-}
