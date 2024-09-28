@@ -110,6 +110,10 @@ kotlin {
             implementation(libs.kotlincrypto.hash.sha2)
             implementation(libs.kotlincrypto.macs.hmac.sha1)
             implementation(libs.kotlincrypto.macs.hmac.sha2)
+
+
+
+            implementation("io.github.vinceglb:filekit-compose:0.8.2")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -169,6 +173,9 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
             packageName = "com.ricsdev.uconnect"
             packageVersion = "1.0.0"
+            linux {
+                modules("jdk.security.auth")
+            }
         }
     }
 }

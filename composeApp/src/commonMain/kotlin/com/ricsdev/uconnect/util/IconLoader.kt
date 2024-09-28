@@ -14,11 +14,11 @@ import uconnect.composeapp.generated.resources.allDrawableResources
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun loadIcon(account: String): Painter? {
-    val drawableResource = Res.allDrawableResources[account]
+    val domain = account.substringAfter(".").substringBefore(".")
+    val drawableResource = Res.allDrawableResources.entries.find { it.key.contains(domain, ignoreCase = true) }?.value
     return if (drawableResource != null) {
         painterResource(drawableResource)
     } else {
         null
     }
 }
-

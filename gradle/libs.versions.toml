@@ -32,6 +32,7 @@ sqlite = "2.5.0-SNAPSHOT"
 
 kotlincrypto-hash = "0.3.0"
 kotlincrypto-macs = "0.3.0"
+foundationDesktop = "1.7.0"
 
 
 
@@ -79,6 +80,7 @@ androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime
 kotlincrypto-hash-sha2 = { module = "org.kotlincrypto.hash:sha2", version.ref = "kotlincrypto-hash" }
 kotlincrypto-macs-hmac-sha1 = { module = "org.kotlincrypto.macs:hmac-sha1", version.ref = "kotlincrypto-macs" }
 kotlincrypto-macs-hmac-sha2 = { module = "org.kotlincrypto.macs:hmac-sha2", version.ref = "kotlincrypto-macs" }
+androidx-foundation-desktop = { group = "androidx.compose.foundation", name = "foundation-desktop", version.ref = "foundationDesktop" }
 
 
 

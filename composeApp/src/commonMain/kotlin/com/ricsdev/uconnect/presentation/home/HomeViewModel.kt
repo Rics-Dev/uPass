@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.domain.model.OtpType
 import com.ricsdev.uconnect.domain.model.TwoFaSettings
+import com.ricsdev.uconnect.domain.model.Vault
 import com.ricsdev.uconnect.domain.usecase.GetAllAccountsUseCase
+import com.ricsdev.uconnect.domain.usecase.SaveAccountUseCase
 import com.ricsdev.uconnect.util.CryptoManager
 import com.ricsdev.uconnect.util.twoFa.OtpManager
 import com.ricsdev.uconnect.util.twoFa.TotpGenerator
@@ -15,10 +17,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 
 
 class HomeViewModel(
     private val getAllAccountsUseCase: GetAllAccountsUseCase,
+    private val saveAccountUseCase: SaveAccountUseCase,
     private val otpManager: OtpManager
 ) : ViewModel() {
 
@@ -66,6 +70,39 @@ class HomeViewModel(
                     _remainingTimeMap.value = _remainingTimeMap.value.toMutableMap().apply { put(accountId, remainingTime / 1000) }
                     delay(500) // Update every second
                 }
+            }
+        }
+    }
+
+
+
+    fun importVault(jsonContent: String) {
+        viewModelScope.launch {
+            try {
+                val json = Json {
+                    ignoreUnknownKeys = true
+                    coerceInputValues = true
+                }
+                val vault = json.decodeFromString<Vault>(jsonContent)
+                println("Vault: $vault")
+                vault.items?.forEach { item ->
+                    val account = if (item.login != null) {
+                        Account(
+                            name = item.name ?: "",
+                            username = item.login.username ?: "",
+                            password = item.login.password ?: "",
+                        )
+                    } else {
+                        Account(
+                            name = item.name ?: "",
+                            note = "Item details: ${item.notes ?: "No notes"}"
+                        )
+                    }
+                    saveAccountUseCase(account)
+                }
+                // Show success message
+            } catch (e: Exception) {
+                println("Error importing vault: ${e.message}")
             }
         }
     }

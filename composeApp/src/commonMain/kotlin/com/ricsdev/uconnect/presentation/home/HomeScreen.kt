@@ -8,16 +8,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Facebook
+import androidx.compose.material.icons.outlined.ImportExport
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,13 +38,19 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.ricsdev.uconnect.PlatformType
 import com.ricsdev.uconnect.domain.model.Account
 import com.ricsdev.uconnect.getPlatform
 import com.ricsdev.uconnect.navigation.Screens
 import com.ricsdev.uconnect.presentation.home.components.HomeFloatingActionButton
 import com.ricsdev.uconnect.presentation.home.components.modal.TwoFaSetup
 import com.ricsdev.uconnect.presentation.sharedComponents.passwordGenerator.PasswordGenerator
+import com.ricsdev.uconnect.util.PlatformVerticalScrollbar
 import com.ricsdev.uconnect.util.loadIcon
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import uconnect.composeapp.generated.resources.Res
@@ -53,10 +63,31 @@ fun HomeScreen(
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
     val accountsState by viewModel.accountsState.collectAsState()
+    var filteredAccountState by remember { mutableStateOf<List<Account>>(emptyList()) }
     var showPasswordGenerator by remember { mutableStateOf(false) }
     var show2faSetup by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+
+    var isSearchActive by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+
+
+    val filePickerLauncher = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("json")),
+        mode = PickerMode.Single,
+        title = "Pick a vault file"
+    ) { file ->
+        coroutineScope.launch {
+            val jsonContent = file?.readBytes()?.decodeToString()
+            if (jsonContent != null) {
+                println("executing import")
+                viewModel.importVault(jsonContent)
+            }
+        }
+    }
 
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let {
@@ -69,7 +100,38 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(),
-                title = { Text(text = "uConnect") }
+                title = {
+                    if (isSearchActive) {
+                        TextField(
+                            value = searchText,
+                            onValueChange = {
+                                searchText = it
+                                filteredAccountState =
+                                    (accountsState as UiState.Success<List<Account>>).data.filter { account -> account.name.contains(searchText, ignoreCase = true) }
+                                            },
+                            placeholder = { Text("Search...") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Text(text = "uConnect")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        isSearchActive = !isSearchActive
+                        if (!isSearchActive) {
+                            searchText = ""
+                        }
+                    }) {
+                        Icon(Icons.Rounded.Search, contentDescription = "Search")
+                    }
+                    IconButton(onClick = {
+                        filePickerLauncher.launch()
+                    }) {
+                        Icon(Icons.Outlined.ImportExport, contentDescription = "Import vault")
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -98,30 +160,45 @@ fun HomeScreen(
                     CircularProgressIndicator()
                 }
             }
+
             is UiState.Success -> {
                 val accounts = (accountsState as UiState.Success<List<Account>>).data
+                filteredAccountState = (accountsState as UiState.Success<List<Account>>).data
                 if (accounts.isEmpty()) {
                     EmptyStateMessage(modifier = Modifier.padding(innerPadding))
                 } else {
-                    LazyColumn(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
-                            .background(MaterialTheme.colorScheme.background),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        items(accounts) { account ->
-                            AccountCard(
-                                viewModel = viewModel,
-                                account = account,
-                                onShowSnackbar = { message -> snackbarMessage = message },
-                                navHostController = navHostController
-                            )
+                        val listState = rememberLazyListState()
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            items(filteredAccountState) { account ->
+                                AccountCard(
+                                    viewModel = viewModel,
+                                    account = account,
+                                    onShowSnackbar = { message -> snackbarMessage = message },
+                                    navHostController = navHostController
+                                )
+                            }
                         }
+
+                        PlatformVerticalScrollbar(
+                            modifier = Modifier.align(Alignment.CenterEnd),
+                            scrollState = listState
+                        )
                     }
                 }
             }
+
             is UiState.Error -> {
                 Box(
                     modifier = Modifier
@@ -162,10 +239,11 @@ fun EmptyStateMessage(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(Icons.Outlined.Shield, contentDescription = "No accounts",
+            Icon(
+                Icons.Outlined.Shield, contentDescription = "No accounts",
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "No accounts added yet.",
@@ -199,8 +277,10 @@ fun AccountCard(
     val currentOtp = otpMap[account.id]
     val remainingTime = remainingTimeMap[account.id] ?: 30
     var isOtpVisible by remember { mutableStateOf(false) }
-    val otpColor = if (remainingTime <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
-    val circleColor = if (remainingTime <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val otpColor =
+        if (remainingTime <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+    val circleColor =
+        if (remainingTime <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
 
     val spacedOtp = currentOtp?.chunked(3)?.joinToString("  ")
 
@@ -210,6 +290,7 @@ fun AccountCard(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .padding(8.dp)
             .shadow(8.dp, RoundedCornerShape(8.dp), clip = true),
         onClick = {
             navHostController.navigate(Screens.AccountDetailsScreen(account.id))
@@ -249,12 +330,14 @@ fun AccountCard(
                     }
                 }
                 Row {
-                    IconButton(onClick = {
-                        clipboardManager.setText(AnnotatedString(account.username))
-                        if (!platform.name.contains("Android")) {
-                            onShowSnackbar("Username copied to clipboard")
-                        }
-                    },) {
+                    IconButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(account.username))
+                            if (!platform.name.contains("Android")) {
+                                onShowSnackbar("Username copied to clipboard")
+                            }
+                        },
+                    ) {
                         Icon(Icons.Outlined.AccountCircle, contentDescription = "Copy username")
                     }
                     IconButton(onClick = {
@@ -289,7 +372,8 @@ fun AccountCard(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.size(40.dp)
                         ) {
-                            val remainingFraction = remainingTime / account.twoFaSettings.period.seconds.toFloat() // full time
+                            val remainingFraction =
+                                remainingTime / account.twoFaSettings.period.seconds.toFloat() // full time
                             val animatedFraction by animateFloatAsState(targetValue = remainingFraction)
 
                             Canvas(modifier = Modifier.size(40.dp)) {
@@ -317,7 +401,8 @@ fun AccountCard(
                         }
                         AnimatedVisibility(visible = !isOtpVisible) {
                             Text(
-                                text = spacedOtp?.map { "* " }?.joinToString("") ?: currentOtp.map { "* " }.joinToString(""),
+                                text = spacedOtp?.map { "* " }?.joinToString("")
+                                    ?: currentOtp.map { "* " }.joinToString(""),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = otpColor,
                             )
