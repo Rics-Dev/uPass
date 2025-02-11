@@ -1,31 +1,31 @@
 [versions]
 adaptive = "1.0.0-alpha03"
-agp = "8.6.1"
+agp = "8.5.2"
 android-compileSdk = "35"
 android-minSdk = "28"
 android-targetSdk = "35"
-androidx-activityCompose = "1.9.2"
+androidx-activityCompose = "1.10.0"
 androidx-appcompat = "1.7.0"
-androidx-constraintlayout = "2.1.4"
-androidx-core-ktx = "1.13.1"
+androidx-constraintlayout = "2.2.0"
+androidx-core-ktx = "1.15.0"
 androidx-espresso-core = "3.6.1"
-androidx-lifecycle = "2.8.2"
+androidx-lifecycle = "2.8.4"
 androidx-test-junit = "1.2.1"
 biometric = "1.4.0-alpha02"
-compose-plugin = "1.7.0-beta02"
+compose-plugin = "1.7.0"
 cryptographyProviderJdk = "0.3.1"
 junit = "4.13.2"
 koin = "4.0.0"
-kotlin = "2.0.20"
-kotlinx-coroutines = "1.8.1"
-kotlinxSerializationJson = "1.7.3"
+kotlin = "2.1.0"
+kotlinx-coroutines = "1.10.1"
+kotlinxSerializationJson = "1.8.0"
 ksp = "2.0.20-1.0.25"
-lifecycleViewModel = "2.8.6"
-material3 = "1.7.0-beta02"
+lifecycleViewModel = "2.8.7"
+material3 = "1.7.1"
 material3AdaptiveNavigationSuite = "1.7.0-beta02"
-materialIconsExtended = "1.7.0-beta02"
+materialIconsExtended = "1.7.3"
 navigationCompose = "2.8.0-alpha09"
-room = "2.7.0-alpha08"
+room = "2.7.0-alpha13"
 securityCrypto = "1.1.0-alpha06"
 startupRuntime = "1.2.0"
 sqlite = "2.5.0-SNAPSHOT"
@@ -62,7 +62,7 @@ androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", nam
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewModel"}
+lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycleViewModel" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

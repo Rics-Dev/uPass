@@ -1,6 +1,8 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -10,7 +12,22 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+
+    id("com.github.gmazzo.buildconfig") version "5.5.0"
+
 }
+
+val apikeyPropertiesFile = rootProject.file("apikey.properties")
+val apikeyProperties = Properties().apply {
+    load(FileInputStream(apikeyPropertiesFile))
+}
+
+
+buildConfig {
+    buildConfigField("String", "SUPABASE_KEY", apikeyProperties["SUPABASE_KEY"] as String)
+}
+
+val buildConfigOutputDir = layout.buildDirectory.dir("generated/buildConfig")
 
 kotlin {
     androidTarget {
@@ -46,11 +63,11 @@ kotlin {
     }
 
 
-
     // Room step6 part1 for adding ksp src directory to use AppDatabase::class.instantiateImpl() in iosMain:
     // Due to https://issuetracker.google.com/u/0/issues/342905180
     sourceSets.commonMain {
         kotlin.srcDir("build/generated/ksp/metadata")
+        kotlin.srcDir(buildConfigOutputDir)
     }
 
     sourceSets {
@@ -114,6 +131,13 @@ kotlin {
 
 
             implementation("io.github.vinceglb:filekit-compose:0.8.2")
+
+
+            implementation(project.dependencies.platform("io.github.jan-tennert.supabase:bom:3.0.0-rc-1"))
+            implementation("io.github.jan-tennert.supabase:auth-kt")
+            implementation("io.github.jan-tennert.supabase:compose-auth")
+            implementation("io.github.jan-tennert.supabase:compose-auth-ui")
+            implementation("io.ktor:ktor-client-cio:3.0.0-rc-1")
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -125,10 +149,12 @@ kotlin {
             implementation(libs.cryptography.provider.apple)
         }
     }
+
+
 }
 
 android {
-    namespace = "com.ricsdev.uconnect"
+    namespace = "com.ricsdev.upass"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -137,7 +163,7 @@ android {
 
 
     defaultConfig {
-        applicationId = "com.ricsdev.uconnect"
+        applicationId = "com.ricsdev.upass"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -167,11 +193,16 @@ android {
 
 compose.desktop {
     application {
-        mainClass = "com.ricsdev.uconnect.MainKt"
+        mainClass = "com.ricsdev.upass.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.AppImage)
-            packageName = "com.ricsdev.uconnect"
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Msi,
+                TargetFormat.Deb,
+                TargetFormat.AppImage
+            )
+            packageName = "com.ricsdev.upass"
             packageVersion = "1.0.0"
             linux {
                 modules("jdk.security.auth")
@@ -197,13 +228,3 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().con
         dependsOn("kspCommonMainKotlinMetadata")
     }
 }
-
-
-//dependencies {
-//    add("kspAndroid", libs.room.compiler)
-//    // Remove or comment out the following lines
-//    // add("kspDesktop", libs.room.compiler)
-//    // add("kspIosX64", libs.room.compiler)
-//    // add("kspIosArm64", libs.room.compiler)
-//    // add("kspIosSimulatorArm64", libs.room.compiler)
-//}

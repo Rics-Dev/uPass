@@ -1,4 +1,4 @@
-rootProject.name = "uConnect"
+rootProject.name = "uPass"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
